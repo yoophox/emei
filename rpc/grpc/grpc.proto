@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "google.golang.org";
+package grpc;
+
+service Grpc {
+  rpc Route(Request) returns(Response) {}
+  rpc RWStream(stream CData) returns(stream CData){}
+}
+
+message Header{
+  string Mid = 1;
+  string Jwt = 2;
+  string Sid = 3;
+  optional string Ver = 4;
+  optional string Typ = 5;
+  optional int32 Code = 6;
+  optional string Reason = 7;
+}
+
+message Request {
+  string Met = 1;
+  Header MsgH = 2;
+  repeated string ReqParams = 3;
+}
+
+message Response {
+  Header MsgH = 1;
+  repeated string ResValues = 2;
+}
+
+message CData {
+  optional bool Close = 1;
+  optional Request Req = 2;
+  optional bytes Data = 3;
+}

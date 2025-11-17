@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: temp
+  labels:
+    web-trans: https
+    nrpc-trans: quic
+    grpc-trans: http
+spec:
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - name: web
+      protocol: TCP
+      port: 9090
+    - name: nrpc
+      protocol: UDP
+      port: 9091
+    - name: grpc
+      protocol: TCP
+      port: 9094

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: uuid
+  labels:
+    web-trans: https
+    nrpc-trans: quic
+    grpc-trans: http
+spec:
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - name: web
+      protocol: TCP
+      port: 9190
+    - name: nrpc
+      protocol: UDP
+      port: 9191
+    - name: grpc
+      protocol: TCP
+      port: 9194
+env:
+  - name: ZOO_MY_ID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['apps.kubernetes.io/pod-index']

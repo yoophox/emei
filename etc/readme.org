@@ -1,0 +1,16 @@
+config center
+register ip to etc using hostid + serviceName as key
+should deploy a server in every worknode of kube system to generate uuid using hostid+github.com/sony/sonyflake
+deploy multi instance of the app on the local host:
+    a, disable etc
+    b, use --grpcport --webport --nrpcport commamd line parm
+    c, config servers.conf host iitem
+deploy multi instance of container of the app on the host(have two methods)
+   method 1:
+      a, disable etc (rm etc.conf)
+      b, deploy a etc prxoy
+      c  config resover item of servers.conf to etc proxy ip and port
+      d, all data pass through etc proxy
+      e, etc proxy must listen on all services port
+   method 2
+      directly use kube
