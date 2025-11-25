@@ -10,7 +10,7 @@ import (
 
   "github.com/yolksys/emei/cfg/coder"
   "github.com/yolksys/emei/cfg/source"
-  "github.com/yolksys/emei/cmd"
+  "github.com/yolksys/emei/cla"
   "github.com/yolksys/emei/utils"
 )
 
@@ -23,7 +23,7 @@ func init() {
 
   Service = path.Base(appPath)
   var svcName string
-  svcName = cmd.String("service", "service name", "")
+  svcName = cla.String("service", "service name", "")
   if svcName != "" {
     Service = svcName
   }

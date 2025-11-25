@@ -5,13 +5,13 @@ import (
 
   "github.com/yolksys/emei/cfg"
   "github.com/yolksys/emei/cfg/source/cetc"
-  "github.com/yolksys/emei/cmd"
+  "github.com/yolksys/emei/cla"
   "github.com/yolksys/emei/etc/dns"
   "github.com/yolksys/emei/etc/etcintra"
 )
 
 func init() {
-  e := cmd.String("etc", "", "") // fmt: "backend;addr,addr,addr;export[;prefix]"
+  e := cla.String("etc", "", "") // fmt: "backend;addr,addr,addr;export[;prefix]"
   if e == "" {
     return
   }

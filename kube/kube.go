@@ -9,7 +9,7 @@ import (
   "sync"
 
   "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/cmd"
+  "github.com/yolksys/emei/cla"
   "github.com/yolksys/emei/kube/resolver"
 )
 
@@ -160,15 +160,15 @@ func initLocalServers() {
 }
 
 func init() {
-  _grpcTrans = cmd.String("grpctrans", "", "")
-  _grpcPort = cmd.String("grpcport", "", "")
-  _nrpcTrans = cmd.String("nrpctrans", "", "")
-  _nrpcPort = cmd.String("nrpcport", "", "")
-  _webTrans = cmd.String("webtrans", "", "")
-  _webPort = cmd.String("webport", "", "")
+  _grpcTrans = cla.String("grpctrans", "", "")
+  _grpcPort = cla.String("grpcport", "", "")
+  _nrpcTrans = cla.String("nrpctrans", "", "")
+  _nrpcPort = cla.String("nrpcport", "", "")
+  _webTrans = cla.String("webtrans", "", "")
+  _webPort = cla.String("webport", "", "")
 
-  dns := cmd.String("dns", "", "")       // addr,addr;com or addr,etc or local:path
-  svcCfg := cmd.String("svccfg", "", "") // etc or cmd or local:[/]path to your dir
+  dns := cla.String("dns", "", "")       // addr,addr;com or addr,etc or local:path
+  svcCfg := cla.String("svccfg", "", "") // etc or cmd or local:[/]path to your dir
 
   if svcCfg == "cmd" {
     GetRpcNet = getRpcCfgFromCmdline
