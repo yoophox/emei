@@ -8,11 +8,11 @@ import (
   "reflect"
   "strings"
 
+  "github.com/quic-go/quic-go"
   "github.com/yolksys/emei/env"
   "github.com/yolksys/emei/log"
   "github.com/yolksys/emei/rpc/coder"
   "github.com/yolksys/emei/rpc/rpcabs"
-  "github.com/quic-go/quic-go"
   rgrpc "google.golang.org/grpc"
 )
 
@@ -71,7 +71,7 @@ func (rpc *recver) RWStream(stm Grpc_RWStreamServer) error {
     return fmt.Errorf("fail:grpc rwstream, reason:m.req is nil")
   }
   rpc.stm = &stream{c: stm}
-  _, err = rpc.Route(nil, m.Req)
+  _, err = rpc.Route(context.TODO(), m.Req)
   return err
 }
 

@@ -53,7 +53,7 @@ func init() {
   }
 }
 
-// 配置文件搜索目录：
+//
 // --cfg-file=path
 // /etc/bin-name.cfg
 // bin-path/cfg/.cfg
