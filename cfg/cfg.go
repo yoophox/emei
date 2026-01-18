@@ -55,32 +55,22 @@ func New(uri string) (Config, error) {
   }, nil
 }
 
-// GetCfgItem ...
-func GetCfgItem(p string, v any) error {
-  if _cfg == nil {
-    return fmt.Errorf("fail:getcfgitem, reason:have no default cfg file")
+func BuildCfgURI(source, path string, coder ...string) string {
+  if coder != nil {
+    return fmt.Sprintf("%s~%s~%s", source, path, coder[0])
+  } else {
+    return fmt.Sprintf("%s~%s", source, path)
   }
-  return _cfg.Scan(p, v)
-}
-
-// SetUID ...
-func SetUID(uid string) {
-  _uid = uid
-}
-
-// GetUID ...
-func GetUID() string {
-  return _uid
 }
 
 // getCoderType ...
 func getCoderType(p string) string {
   ext := path.Ext(p)
   switch ext {
-  case "cfg":
-    return "cfg"
+  case "json":
+    return CFG_CODER_JSON
   case "yaml":
-    return "yaml"
+    return CFG_CODER_YAML
   default:
     return ""
   }

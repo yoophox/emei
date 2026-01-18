@@ -11,10 +11,10 @@ type Tjatse struct {
   Mid string `json:"mid,omitempty"` // 消息id, traced
   Jwt string `json:"jwt,omitempty"`
   Sid string `json:"sid,omitempty"` // span id
-  // Met    string `json:"met,omitempty"` // call method
-  Ver    string `json:"version,omitempty"`
-  Typ    string `json:"typ,omitempty"`    // request， response，notify `request:"CustomRoleMgr"`...
-  Code   int32  `json:"code,omitempty"`   // for response
+  // Met string `json:"met,omitempty"` // call method
+  Ver string `json:"version,omitempty"`
+  // Typ    string `json:"type,omitempty"`   // request， response，notify `request:"CustomRoleMgr"`...
+  Code   string `json:"code,omitempty"`   // for response
   Reason string `json:"reason,omitempty"` // for response
 }
 

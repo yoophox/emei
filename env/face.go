@@ -1,23 +1,24 @@
 package env
 
-import "reflect"
+import "github.com/yolksys/emei/errs"
 
 type Env interface {
-  Finish()
+  Finish(f ...Action) // f,params...
   Return()
   Assert()
-  HasError() bool
-  ResetErr()
-  Err() error
-  Errorf(code uint16, f string, args ...any) error
-  AssertErr(err error, clear ...func())
-  AssertBool(ok bool, args ...any)
-  Event(args ...interface{})
-  PrintParams(v ...reflect.Value)
-  GetDec() decoder
-  GetMsgHeader() *Tjatse
-  SetReV(v []reflect.Value)
-  CheckErr(rtv ...reflect.Value) bool
+  AssertErr(err error) // o=func() or ErrId
+  AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any)
+  Propagate(crr ...Carrier) error
 }
 
-var New = new
+type Carrier interface {
+  Inject(*Tjatse) error
+  Extract(*Tjatse) error
+}
+
+var (
+  New           = new
+  NewDftCarrier = newDftCarrier
+)
+
+type Action func() error

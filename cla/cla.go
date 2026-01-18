@@ -15,19 +15,14 @@ func Bool(name, desc string, dft bool, short ...rune) bool {
     s = string(short[0])
   }
 
-  ok := check(name, desc, "bool", s)
-  if !ok {
-    return false
-  }
-
-  lv_, lok := _cmds[name]
-  sv_, sok := _cmds[s]
+  lv_, lok := _cmdDesc[name]
+  sv_, sok := _cmdDesc[s]
   if lok && sok {
     _reduplicativeCmd = append(_reduplicativeCmd, fmt.Sprintf("%s, %s", name, s))
     return false
   }
 
-  var v *value
+  var v *cdesc
 
   if lok {
     v = lv_
@@ -36,14 +31,17 @@ func Bool(name, desc string, dft bool, short ...rune) bool {
   } else {
     return dft
   }
+
+  // v.typ = "bool"
   v.used = true
 
-  if v.str == "" || v.str == "true" {
+  switch v.value {
+  case "", "true":
     return true
-  } else if v.str == "false" {
+  case "false":
     return false
-  } else {
-    _errCmds = append(_errCmds, fmt.Sprintf("bool:%s:%s", name, v.str))
+  default:
+    _errCmds = append(_errCmds, fmt.Sprintf("bool:%s:%s", name, v.value))
   }
 
   return false
@@ -55,19 +53,14 @@ func String(name, desc string, dft string, short ...rune) string {
     s = string(short[0])
   }
 
-  ok := check(name, desc, "bool", s)
-  if !ok {
-    return ""
-  }
-
-  lv_, lok := _cmds[name]
-  sv_, sok := _cmds[s]
+  lv_, lok := _cmdDesc[name]
+  sv_, sok := _cmdDesc[s]
   if lok && sok {
     _reduplicativeCmd = append(_reduplicativeCmd, fmt.Sprintf("%s, %s", name, s))
     return ""
   }
 
-  var v *value
+  var v *cdesc
 
   if lok {
     v = lv_
@@ -76,16 +69,16 @@ func String(name, desc string, dft string, short ...rune) string {
   } else {
     return dft
   }
-  v.used = true
 
-  return v.str
+  v.used = true
+  return v.value
 }
 
-func Int64(name, desc string, short rune, dft int64) int64 {
+func Int64(name, desc string, dft int64, short ...rune) int64 {
   return dft
 }
 
-func Uint64(name, desc string, short rune, dft uint64) uint64 {
+func Uint64(name, desc string, dft uint64, short ...rune) uint64 {
   return dft
 }
 
@@ -96,11 +89,19 @@ func Lookup(key string) (string, bool) {
 
 // Assert ...
 func Assert() {
+  _, isHelp := _cmdDesc["help"]
+  _, isH := _cmdDesc["h"]
+  if isH || isHelp {
+    usage()
+    os.Exit(0)
+  }
+
   noAllUsed := false
-  for _, value := range _cmds {
+  for _, value := range _cmdDesc {
     if !value.used {
       noAllUsed = true
-      break
+      _notSupported = append(_notSupported, value.name)
+      // break
     }
   }
 
@@ -114,24 +115,24 @@ func Assert() {
 
 // parseCmd ...
 func parseCmd() {
-  reg := regexp.MustCompile(`^[a-zA-Z\.]+(=.+)?$`)
+  _reg := regexp.MustCompile(`^[a-zA-Z\.]+(=.+)?$`)
   for i := 1; i < len(os.Args); i++ {
-    if len(os.Args[i]) > 2 && os.Args[i][:2] == "--" && reg.MatchString(os.Args[i][2:]) {
+    if len(os.Args[i]) > 2 && os.Args[i][:2] == "--" && _reg.MatchString(os.Args[i][2:]) {
       pos := strings.Index(os.Args[i][2:], "=")
       if pos > 0 {
-        _cmds[os.Args[i][2:2+pos]] = &value{os.Args[i][2+pos+1:], false}
+        _cmdDesc[os.Args[i][2:2+pos]] = &cdesc{name: os.Args[i][2:pos], value: os.Args[i][2+pos+1:]}
       } else if i < len(os.Args)-1 && os.Args[i+1][0] != '-' {
-        _cmds[os.Args[i][2:]] = &value{os.Args[i+1], false}
+        _cmdDesc[os.Args[i][2:]] = &cdesc{name: os.Args[i][2:], value: os.Args[i+1]}
         i++
       } else {
-        _cmds[os.Args[i][2:]] = &value{}
+        _cmdDesc[os.Args[i][2:]] = &cdesc{name: os.Args[i][2:]}
       }
-    } else if len(os.Args[i]) == 2 && os.Args[i][0] == '-' && reg.MatchString(os.Args[i][2:]) {
+    } else if len(os.Args[i]) == 2 && os.Args[i][0] == '-' && _reg.MatchString(os.Args[i][2:]) {
       if i < len(os.Args)-1 && os.Args[i+1][0] != '-' {
-        _cmds[os.Args[i][1:]] = &value{os.Args[i+1], false}
+        _cmdDesc[os.Args[i][1:]] = &cdesc{value: os.Args[i+1]}
         i++
       } else {
-        _cmds[os.Args[i][1:]] = &value{}
+        _cmdDesc[os.Args[i][1:]] = &cdesc{}
       }
     } else {
       _errCmds = append(_errCmds, os.Args[i])
@@ -140,47 +141,72 @@ func parseCmd() {
 }
 
 // check ...
-func check(name, desc, typ, d string) bool {
-  f, fc_, l := utils.GetCallInfo(2)
-  cio := fmt.Sprintf("%s-%s-%d", f, fc_, l)
-  descv, ok := _cmdDesc[name]
-  if ok {
-    _errCmds = append(_errCmds, fmt.Sprintf("fail:%s, reason:reregister, origin:%s, cur:%s", typ, descv.reger, cio))
-    return false
-  }
-
-  _cmdDesc[name] = &cdesc{
-    desc:  desc,
-    short: d,
-    typ:   typ,
-    reger: cio,
-  }
-  return true
-}
+// func check(name, desc, typ, d string) bool {
+//   f, fc_, l := utils.GetCallInfo(2)
+//   cio := fmt.Sprintf("%s-%s-%d", f, fc_, l)
+//   descv, ok := _cmdDesc[name]
+//   if ok {
+//     _errCmds = append(_errCmds, fmt.Sprintf("fail:%s, reason:reregister, origin:%s, cur:%s", typ, descv.reger, cio))
+//     return false
+//   }
+//
+//   _cmdDesc[name] = &cdesc{
+//     desc:  desc,
+//     short: d,
+//     typ:   typ,
+//     reger: cio,
+//   }
+//   return true
+// }
 
 // usage ...
 func usage() {
+  if len(_reduplicativeCmd) > 0 {
+    fmt.Print("redupicative parameters:\n")
+    for _, value := range _reduplicativeCmd {
+      fmt.Print("    ", value)
+    }
+  }
+
+  if len(_errCmds) > 0 {
+    for _, value := range _errCmds {
+      fmt.Print("error cmds:\n")
+      fmt.Print("    ", value)
+    }
+  }
+
+  if len(_notSupported) > 0 {
+    fmt.Print("not supportted cmds:\n")
+    for _, value := range _notSupported {
+      fmt.Print("    ", value)
+    }
+  }
+
+  fmt.Print("usage:\n")
+  for k, v := range _cmdDesc {
+    fmt.Print("    ", k, "    ", v)
+  }
 }
 
 func init() {
   parseCmd()
 }
 
-type value struct {
-  str  string
-  used bool
-}
-
+// argument value
 type cdesc struct {
-  desc  string
+  name  string
   short string
+  desc  string
+  value string
   typ   string
-  reger string
+  used  bool
+  // reger string
+  v any
 }
 
 var (
-  _cmds             = map[string]*value{}
   _cmdDesc          = map[string]*cdesc{}
   _reduplicativeCmd = []string{} //"long, short"
   _errCmds          = []string{}
+  _notSupported     = []string{}
 )

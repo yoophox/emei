@@ -12,7 +12,7 @@ var (
   CallWithRWStream = _c.CallWithRWStream
 )
 
-func call(e Env, svcName, met string, args ...any) error {
+func Call(e Env, svcName, met string, args ...any) error {
   return _c.Call(e.(env.Env), svcName, met, args...)
 }
 

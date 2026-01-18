@@ -29,10 +29,6 @@ func AssertTrue(a bool) {
   }
 }
 
-// ...
-func catch() {
-}
-
 // skip = 0, return name of caller of GetCallInfo
 func GetCallInfo(skip int) (file string,
   function string, line int,
@@ -49,7 +45,7 @@ func GetCallInfo(skip int) (file string,
 
 // GetPanicFrame ...
 // skip == 0, return fram of caller 0f GetPanicFrame
-func GetPanicFrame(skip int) *runtime.Frame {
+func GetCallerFrame(skip int) *runtime.Frame {
   _, f, _ := GetCallInfo(skip + 1)
   if f == "" {
     return nil
@@ -67,6 +63,22 @@ func GetPanicFrame(skip int) *runtime.Frame {
   }
 
   return &frame
+}
+
+// IsCalledFromInit ...
+func IsCalledFromInit() bool {
+  pc_ := ptrPool.Get().([]uintptr)
+  n := runtime.Callers(1, pc_)
+  frames := runtime.CallersFrames(pc_[:n])
+  frame, _ := frames.Next()
+  ok := true
+  for ; ok; frame, ok = frames.Next() {
+    if frame.Function == "init" {
+      return true
+    }
+  }
+
+  return false
 }
 
 // IpType ...

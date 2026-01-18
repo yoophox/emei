@@ -1,0 +1,2 @@
+#+title: commonly used algotithm
+#+author: chen yingfei

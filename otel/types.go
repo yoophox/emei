@@ -3,7 +3,6 @@ package otel
 import (
   "go.opentelemetry.io/otel/attribute"
   "go.opentelemetry.io/otel/log"
-  "go.opentelemetry.io/otel/metric"
   "go.opentelemetry.io/otel/trace"
 )
 
@@ -41,9 +40,4 @@ type Meter interface {
 
 type meter struct {
   rpc, met, key string
-}
-
-type resetableConter struct {
-  cnt       uint64
-  upDownCnt metric.Int64UpDownCounter
 }

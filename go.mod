@@ -1,6 +1,6 @@
 module github.com/yolksys/emei
 
-go 1.24.0
+go 1.25.5
 
 require (
 	github.com/goccy/go-yaml v1.17.1
@@ -31,6 +31,8 @@ require (
 )
 
 require github.com/golang-jwt/jwt/v5 v5.2.3
+
+require github.com/fsnotify/fsnotify v1.9.0 // indirect
 
 require (
 	github.com/pion/datachannel v1.5.10 // indirect
@@ -73,7 +75,7 @@ require (
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
-       	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

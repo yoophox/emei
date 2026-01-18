@@ -7,74 +7,82 @@ import (
   "reflect"
   "sync"
 
+  "github.com/yolksys/emei/errs"
+  "github.com/yolksys/emei/jwt"
   "github.com/yolksys/emei/log"
   "github.com/yolksys/emei/log/core"
-
   "github.com/yolksys/emei/otel"
   "github.com/yolksys/emei/utils"
 )
 
 type env struct {
-  L   log.Logger
-  Cf_ []func()        // callback
-  Ecf []func()        // error call back
-  ReV []reflect.Value // return values
-  Par *env            // up env
+  log.Logger
+  // Cf_ []func()        // callback
+  // Ecf []func()        // error call back
+  // ReV []reflect.Value // return values
+  Par  *env   // up env
+  tjax Tjatse // trace info for oepntele
 
-  msgH  *Tjatse
-  enc   encoder // encode return value
-  dec   decoder //
-  span  otel.Span
-  rpc   string
-  met   string
-  meter otel.Meter
-  err   error
+  span otel.Span
+  // rpc   string
+  // met   string
+  // meter otel.Meter
+  err     error
+  actions []Action
+  jwt     jwt.JWT
 }
 
 // New ...
-func new(rpc, met string, enc encoder, dec decoder) Env {
+func new(crr ...Carrier) *env {
   e := pool.Get().(*env)
-  e.L = log.New(context.Background(), core.WithCacheMode())
-  e.L.CallerSkip(envLogSkip)
-  e.L.Event("*", "start")
-  e.enc = enc
-  e.dec = dec
+  e.Logger = log.New(context.Background(), core.WithCacheMode())
+  e.Logger.CallerSkip(envLogSkip)
+  e.Logger.Event("*", "start")
 
-  if dec == nil {
-    e.msgH = &Tjatse{}
+  if e.actions == nil {
+    e.actions = []Action{}
   } else {
-    h, err := dec.Header()
-    e.msgH = h
-    e.err = err
+    e.actions = e.actions[:0]
   }
 
-  e.span = otel.Trace(e.msgH, rpc+"."+met)
+  //
+  if crr != nil {
+    err := crr[0].Extract(&e.tjax)
+    if err != nil {
+      e.err = errs.Wrap(err, ERR_ID_ENV_EXTRACT)
+      return e
+    }
+  } else {
+    e.tjax.Mid = ""
+  }
+
+  e.span = otel.Trace(&e.tjax)
   if e.span == nil {
+    e.AddAttri("uid", e.uid())
+    e.AddAttri("uname", e.uname())
     return e
   }
-  e.L.SetTraceId(e.span.TID())
-  e.L.SetTraceId(e.span.TID())
-  if e.msgH.Mid == "" {
-    e.span.AddAttri("uid", e.msgH.Uid())
-    e.span.AddAttri("uname", e.msgH.UName())
-  }
-
-  e.meter = otel.Metric(rpc, met)
+  e.Logger.SetTraceId(e.span.TID())
 
   return e
 }
 
 // Finish ...
-func (e *env) Finish() {
+func (e *env) Finish(actf ...Action) {
+  if actf != nil {
+    for _, f := range actf {
+      e.actions = append(e.actions, f)
+    }
+
+    return
+  }
   defer e.Release()
-  defer e.L.Flush()
+  defer e.Logger.Flush()
   defer func() {
     if e.span != nil {
       e.span.End()
     }
-    if e.meter != nil {
-      e.meter.End()
-    }
+    e.Logger.Event("*", "finished")
   }()
 
   if r := recover(); r != nil {
@@ -83,39 +91,44 @@ func (e *env) Finish() {
       e.err = fmt.Errorf("fail: unexpected panic")
     }
 
-    fal := utils.GetPanicFrame(panicFrameSkip)
-    e.L.CallerSkip(-1)
+    fal := utils.GetCallerFrame(panicFrameSkip)
+    e.Logger.CallerSkip(-1)
     // defer e.L.CallerSkip(envLogSkip)
-    e.L.Fatal("S-F", path.Base(fal.Function),
+    e.Logger.Fatal("S-F", path.Base(fal.Function),
       "S-pos", fmt.Sprintf("%s:%d", path.Base(fal.File), fal.Line),
       "panic", fmt.Sprintf("%+v", r))
-  } else {
-    e.L.Event("*", "finished")
+
+    e_, ok := e.err.(*errs.Err)
+    if ok {
+      e.tjax.Code = string(e_.Eid)
+    } else {
+      e.tjax.Code = "err.default"
+    }
+    e.tjax.Reason = e.err.Error()
   }
 
-  for _, v := range e.Cf_ {
-    v()
+  e.Logger.CallerSkip(envLogSkip)
+
+  if e.err != nil || len(e.actions) > 0 {
+    err := e.Propagate()
+    if err != nil {
+      e.Error("env propagate", err.Error())
+    }
   }
 
-  if e.enc == nil || e.dec == nil {
-    return
+  for _, f := range e.actions {
+    err := f()
+    if err != nil {
+      e.Error("env action:"+reflect.TypeOf(f).Name(), err.Error())
+      break
+    }
   }
-
-  if e.err != nil {
-    e.msgH.Code = 1
-    e.msgH.Reason = e.err.Error()
-    e.ReV = nil
-  }
-
-  // e.L.error(e.err)
-  e.L.CallerSkip(envLogSkip)
-  e.writeRetV()
 }
 
 func (e *env) Return() {
   r := recover()
   if r == nil {
-    e.L.Event("*", "returned")
+    e.Logger.Event("*", "returned")
     return
   }
 
@@ -123,22 +136,16 @@ func (e *env) Return() {
     e.err = fmt.Errorf("fail: unexpected panic")
   }
 
-  fal := utils.GetPanicFrame(panicFrameSkip + 1)
-  e.L.CallerSkip(-1)
-  defer e.L.CallerSkip(envLogSkip)
-  e.L.Fatal("S-F", path.Base(fal.Function),
+  fal := utils.GetCallerFrame(panicFrameSkip + 1)
+  e.Logger.CallerSkip(-1)
+  defer e.Logger.CallerSkip(envLogSkip)
+  e.Logger.Fatal("S-F", path.Base(fal.Function),
     "S-pos", fmt.Sprintf("%s:%d", path.Base(fal.File), fal.Line),
     "panic", fmt.Sprintf("%+v", r))
 }
 
 func (e *env) Release() {
-  log.Release(e.L)
-  if e.enc != nil {
-    e.enc.Release()
-  }
-  if e.dec != nil {
-    e.dec.Release()
-  }
+  log.Release(e.Logger)
   pool.Put(e)
   return
 }
@@ -159,140 +166,59 @@ func (e *env) ResetErr() {
   e.err = nil
 }
 
-func (e *env) AssertErr(err error, clear ...func()) {
+func (e *env) AssertErr(err error) {
   if err == nil {
     return
   }
 
-  for _, value := range clear {
-    value()
-  }
-  e.L.Error("msg", err)
+  // for _, value := range clear {
+  //   switch v := value.(type) {
+  //   case ClearFunc:
+  //     v()
+  //   case errs.ErrId:
+  //     err = errs.Wrap(err, v)
+  //   }
+  // }
+  e.Logger.Error("msg", err)
 
   e.err = err
-  panic("")
+  panic(err)
 }
 
-func (e *env) AssertBool(ok bool, args ...any) {
+func (e *env) AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any) {
   if ok {
     return
   }
 
-  err := fmt.Errorf("fail:assertbool, info:%+v", args)
-  e.L.Error("msg", err)
-  e.err = err
+  err := fmt.Errorf(fmt_, args)
+  e.Logger.Error("msg", err)
+  e.err = errs.Wrap(err, eid)
   panic("")
 }
 
-func (e *env) Event(args ...interface{}) {
-  e.L.Event(args...)
-}
-
-func (e *env) PrintParams(v ...reflect.Value) {
-  if len(v) < 3 {
-    return
-  }
-
-  str := []string{}
-  for _, value := range v[2:] {
-    s := fmt.Sprintf("%+v", value)
-    str = append(str, string(s))
-  }
-  e.L.Event("params", str)
-}
-
-func (e *env) GetDec() decoder {
-  return e.dec
-}
-
-func (e *env) GetMsgHeader() *Tjatse {
+func (e *env) Propagate(crr ...Carrier) error {
   if e.span != nil {
-    e.msgH.SetSID(e.span.SID())
-    e.msgH.SetTID(e.span.TID())
+    e.tjax.SetSID(e.span.SID())
+    e.tjax.SetTID(e.span.TID())
   }
 
-  return e.msgH
+  return nil
 }
 
-func (e *env) SetReV(v []reflect.Value) {
-  e.ReV = v
+func (e *env) uid() string {
+  if e.jwt == nil {
+    e.jwt = jwt.Parse(e.tjax.Jwt)
+  }
+
+  return e.jwt.GetClaim(jwt.COMMON_USER_CLAIM_UID)
 }
 
-func (e *env) writeRetV() {
-  if e.CheckErr() {
-    return
+func (e *env) uname() string {
+  if e.jwt == nil {
+    e.jwt = jwt.Parse(e.tjax.Jwt)
   }
 
-  for i := 0; i < len(e.ReV); i++ {
-    err := e.enc.Encode(e.ReV[i].Interface())
-    if err != nil {
-      e.L.Event("msg", err)
-      break
-    }
-  }
-}
-
-func (e *env) CheckErr(rtv ...reflect.Value) bool {
-  // err := e.err
-  var eErr *Err
-
-  rtv_ := e.ReV
-  if len(rtv) > 0 {
-    rtv_ = rtv
-  }
-
-  for {
-    if e.err != nil {
-      break
-    }
-
-    if len(rtv_) == 0 {
-      return false
-    }
-
-    ler := rtv_[len(rtv_)-1].Interface()
-    if ler == nil {
-      if len(rtv) == 0 {
-        e.ReV = e.ReV[:len(e.ReV)-1]
-      }
-      return false
-    }
-
-    if err_, ok := ler.(*Err); ok {
-      eErr = err_
-      e.err = err_
-    } else if err_, ok := ler.(error); ok {
-      e.err = err_
-    } else {
-      return false
-    }
-
-    break
-  }
-
-  if len(rtv) > 0 {
-    return true
-  }
-
-  if eErr != nil {
-    e.msgH.Code = int32(eErr.Code)
-  } else {
-    e.msgH.Code = int32(InternalServerErr)
-  }
-  e.msgH.Reason = e.err.Error()
-  e.enc.Encode(e.msgH)
-
-  return true
-}
-
-type encoder interface {
-  Encode(v any) error
-  Release()
-}
-type decoder interface {
-  Header() (*Tjatse, error)
-  Decode(v any) error
-  Release()
+  return e.jwt.GetClaim(jwt.COMMON_USER_CLAIM_UNAME)
 }
 
 var (

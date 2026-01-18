@@ -24,3 +24,9 @@ var _loaders = map[string]loadF{
   "local": local.Load,
   "etc":   cetc.Load,
 }
+
+const (
+  CFG_SOURCE_LOCAL = "local"
+  CFG_SOURCE_ETC   = "etc"
+  CFG_SOURCE_KUBE  = "kube"
+)

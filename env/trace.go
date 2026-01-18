@@ -15,12 +15,3 @@ func (m *Tjatse) SetSID(i string) {
 func (m *Tjatse) SetTID(i string) {
   m.Mid = i
 }
-
-// User ...
-func (m *Tjatse) Uid() string {
-  return "" // jwd
-}
-
-func (m *Tjatse) UName() string {
-  return "" // jwd
-}

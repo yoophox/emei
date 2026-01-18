@@ -27,13 +27,18 @@ var (
   _tracer trace.Tracer
 )
 
+//var (
+//  _totalCnt       metric.Int64Counter
+//  _nrpcCnt        metric.Int64Counter
+//  _webCnt         metric.Int64Counter
+//  _grpcCnt        metric.Int64Counter
+//  _apiCnt         = map[string]metric.Int64Counter{}
+//  _apiRealTimeCnt = map[string]metric.Int64UpDownCounter{}
+//)
+
 var (
-  _totalCnt       metric.Int64Counter
-  _nrpcCnt        metric.Int64Counter
-  _webCnt         metric.Int64Counter
-  _grpcCnt        metric.Int64Counter
-  _apiCnt         = map[string]metric.Int64Counter{}
-  _apiRealTimeCnt = map[string]metric.Int64UpDownCounter{}
+  _allMeters    = map[string]metric.Int64UpDownCounter{}
+  _allMetersCnt = map[string]int64{}
 )
 
 var (

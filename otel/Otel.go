@@ -2,13 +2,14 @@ package otel
 
 import (
   "context"
-  "fmt"
 
+  "github.com/yolksys/emei/cfg"
+  "github.com/yolksys/emei/utils"
   "go.opentelemetry.io/otel/log"
 )
 
 // Trace ...
-func Trace(d TracedData, name string) Span {
+func Trace(d TracedData) Span {
   if _tracer == nil {
     return nil
   }
@@ -17,38 +18,60 @@ func Trace(d TracedData, name string) Span {
   if d.TraceId() != "" {
     ctx = newSpanCtxFromTraceData(d)
   }
-  _, s := _tracer.Start(ctx, name)
+  _, s := _tracer.Start(ctx, cfg.Service)
   return &span{s}
 }
 
 // Metric ...
-func Metric(rpc, api string) Meter {
+func Metric(key string, unit ...any) {
   if _meter == nil {
-    return nil
+    return
   }
 
-  ctx := context.Background()
-  key := rpc + "." + api
-  c, ok := _apiCnt[key]
-  if ok {
-    c.Add(ctx, 1)
-  }
-  c0, ok := _apiRealTimeCnt[key]
-  if ok {
-    c0.Add(ctx, 1)
-  }
-  _totalCnt.Add(ctx, 1)
-
-  switch rpc {
-  case "web":
-    _webCnt.Add(ctx, 1)
-  case "nrpc":
-    _nrpcCnt.Add(ctx, 1)
-  case "grpc":
-    _grpcCnt.Add(ctx, 1)
+  var i int64 = 1
+  var ok bool
+  // i, ok = unit.(int64)
+  if len(unit) > 0 {
+    i, ok = unit[0].(int64)
+    if !ok {
+      return
+    }
   }
 
-  return &meter{rpc, api, key}
+  m, ok := _allMeters[key]
+  if !ok {
+    return
+  }
+
+  m.Add(context.TODO(), i)
+}
+
+// InitAllUpDownCounter ...
+// called in init function of package
+// @args: key, desc pair
+func InitAllUpDownCounter(args ...string) {
+  if _meter == nil {
+    return
+  }
+
+  if !utils.IsCalledFromInit() {
+    panic("this func must be called from init")
+  }
+
+  lastI := len(args) - 1
+  for i := 0; i < len(args); i += 2 {
+    if i == lastI {
+      break
+    }
+
+    key := args[i]
+    var err error
+    _allMeters[key], err = _meter.Int64UpDownCounter(key)
+    if err != nil {
+      panic(err)
+    }
+    _allMetersCnt[key] = 0
+  }
 }
 
 // Log ...
@@ -58,16 +81,4 @@ func Log(c *log.Record) {
   }
 
   _logger.Emit(context.Background(), *c)
-}
-
-// ...
-func AddApiMeter(rpc, api string) {
-  key := rpc + "." + api
-  var err error
-  _apiCnt[key], err = _meter.Int64Counter(key)
-  if err != nil {
-    fmt.Println("addapimeter err: ", err)
-  }
-
-  _apiRealTimeCnt[key], _ = _meter.Int64UpDownCounter(key + "_real-time")
 }

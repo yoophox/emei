@@ -5,11 +5,13 @@ import (
 )
 
 func main() {
+  // used services by this app
+  _ = []string{"@@service0"}
+
   emei.RegRecver(_sssss)
   emei.Serve()
-  return
 }
 
 func init() {
- emei.AssertCmd()
+  emei.AssertCmd()
 }

@@ -5,6 +5,7 @@ import (
   "fmt"
 
   "github.com/yolksys/emei/cfg/coder/cfgc"
+  "github.com/yolksys/emei/cfg/coder/ckube"
   "github.com/yolksys/emei/cfg/coder/yaml"
   "github.com/yolksys/emei/cfg/source/inter"
   "github.com/yolksys/emei/cfg/values"
@@ -25,8 +26,15 @@ type encF func(s inter.Source) (values.Values, error)
 
 var (
   _encs = map[string]encF{
-    "cfg":  cfgc.Encode,
+    "json": cfgc.Encode,
     "yaml": yaml.Encode,
+    "kube": ckube.Encode,
   }
   p = 0
+)
+
+const (
+  CFG_CODER_JSON   = "json"
+  CFG_CODER_YAML   = "yaml"
+  CFG_CODER_STRUCT = "struct"
 )
