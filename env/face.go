@@ -11,6 +11,7 @@ type Env interface {
   Assert()
   AssertErr(err error, eid ...errs.ErrId) // o=func() or ErrId
   AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any)
+  Err() error
   TID() string
   JWT(j ...any) jwt.JWT // j=string/JWT
   // Propagate(crr ...Carrier) error

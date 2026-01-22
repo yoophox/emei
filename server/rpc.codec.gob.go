@@ -1,9 +1,8 @@
-package codec
+package svr
 
 import (
   "encoding/gob"
   "io"
-  "reflect"
 )
 
 var (
@@ -16,16 +15,8 @@ type gobTx struct {
   *gob.Encoder
 }
 
-func (g *gobTx) DecodeTyps(typs ...reflect.Type) (vs []reflect.Value, err error) {
-  return
-}
-
-func (g *gobTx) EncodeValues(vs ...reflect.Value) error {
-  return nil
-}
-
 // New ...
-func NewGob(io io.ReadWriteCloser) *gobTx {
+func newGobCodec(io io.ReadWriteCloser) *gobTx {
   return &gobTx{
     Decoder: gob.NewDecoder(io),
     Encoder: gob.NewEncoder(io),

@@ -1,6 +1,6 @@
-package codec
+package svr
 
-type CodecIx interface {
+type codecIx interface {
   Decode(v any) error
   Encode(v any) error
   // DecodeTyps(typs ...reflect.Type) ([]reflect.Value, error)

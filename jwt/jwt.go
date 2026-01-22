@@ -15,6 +15,7 @@ type JWT interface {
   IsLegal() bool
   ErrInfo() error
   Sign() (string, error)
+  Raw() string
 }
 
 // New ...

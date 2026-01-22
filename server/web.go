@@ -1,4 +1,4 @@
-package session
+package svr
 
 import "net/http"
 

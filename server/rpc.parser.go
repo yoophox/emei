@@ -1,13 +1,15 @@
-package rpc
+package svr
 
 import (
   "go/token"
   "reflect"
   "strings"
+
+  "github.com/yolksys/emei/log"
 )
 
 // ...
-func parse(rc_ any) error {
+func parseRpc(rc_ any) error {
   tpy := reflect.TypeOf(rc_)
   tvalue := reflect.ValueOf(rc_)
   tname := reflect.Indirect(tvalue).Type().Name()
@@ -19,7 +21,7 @@ func parse(rc_ any) error {
     panic("is not exported type")
   }
 
-  _rcvr := rcvr{
+  _rcvr := rcvrTx{
     params: make(map[string][]reflect.Type),
     funcs:  make(map[string]reflect.Value),
     value:  tvalue,
@@ -37,12 +39,16 @@ func parse(rc_ any) error {
       continue
     }
 
+    if mt_.In(1) != typeOfEnv {
+      continue
+    }
+
     if mt_.NumIn() == 2 && (mt_.NumOut() == 0 ||
       (mt_.NumOut() == 1 && mt_.Out(0) == typeOfError)) {
       continue
     }
 
-    isLegalF := true
+    isLegalF := false
     params := []reflect.Type{}
     for j := 2; j < mt_.NumIn(); j++ {
       pt_ := mt_.In(j)
@@ -52,9 +58,7 @@ func parse(rc_ any) error {
         if (j != mt_.NumIn()-1) ||
           ((pt_ != typeOfReader) &&
             (pt_ != typeOfWriter) &&
-            (pt_ != typeOfReaderWriter) &&
-            (pt_ != typeOfUpFiles)) {
-          isLegalF = false
+            (pt_ != typeOfReaderWriter)) {
           break
         }
       } else if ptk == reflect.Slice ||
@@ -79,6 +83,7 @@ func parse(rc_ any) error {
         break
       }
 
+      isLegalF = true
       params = append(params, pt_)
     }
     if !isLegalF {
@@ -94,7 +99,8 @@ func parse(rc_ any) error {
     panic("have no exported method")
   }
 
-  _recvs[strings.ToLower(tname)] = &_rcvr
+  log.Debug("*****", _rcvr)
+  _rpcRecvs[strings.ToLower(tname)] = &_rcvr
 
   return nil
 }

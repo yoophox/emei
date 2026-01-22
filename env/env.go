@@ -165,6 +165,10 @@ func (e *env) AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any) {
   panic("")
 }
 
+func (e *env) Err() error {
+  return e.err
+}
+
 func (e *env) TID() string {
   if e.span != nil {
     return e.span.TID()

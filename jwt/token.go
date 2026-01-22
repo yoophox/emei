@@ -66,8 +66,12 @@ func (k *token) Sign() (string, error) {
   }
   s, err := k.SignedString(prikey)
   if err == nil {
-    k.Raw = s
+    k.Token.Raw = s
   }
 
   return s, err
+}
+
+func (k *token) Raw() string {
+  return k.Token.Raw
 }

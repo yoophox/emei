@@ -1,4 +1,4 @@
-package errors
+package svr
 
 import "github.com/yolksys/emei/errs"
 

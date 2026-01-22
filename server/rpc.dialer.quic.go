@@ -1,4 +1,4 @@
-package quic
+package svr
 
 import (
   "context"
@@ -9,11 +9,10 @@ import (
   "github.com/quic-go/quic-go"
   "github.com/yolksys/emei/errs"
   "github.com/yolksys/emei/pki"
-  "github.com/yolksys/emei/rpc/errors"
 )
 
 // Dial ...
-func Dial(addr string) (io.ReadWriteCloser, error) {
+func dialQuic(addr string) (io.ReadWriteCloser, error) {
   _mtx.RLock()
   c, ok := _conns[addr]
   if !ok {
@@ -29,9 +28,10 @@ func Dial(addr string) (io.ReadWriteCloser, error) {
       if err != nil {
         return nil, err
       }
+      tlsc.NextProtos = []string{string(RPC_ALP_GOB)}
       c, err = quic.DialAddrEarly(ctx, addr, tlsc, &quic.Config{Allow0RTT: true})
       if err != nil {
-        return nil, errs.Wrap(err, errors.ERR_ID_RPC_QUIC_DIAL_EARLY)
+        return nil, errs.Wrap(err, ERR_ID_RPC_QUIC_DIAL_EARLY)
       }
 
       _conns[addr] = c
@@ -49,7 +49,7 @@ func Dial(addr string) (io.ReadWriteCloser, error) {
   _mtx.Lock()
   delete(_conns, addr)
   _mtx.Unlock()
-  return nil, errs.Wrap(err, errors.ERR_ID_RPC_QUIC_OPEN_STREAM)
+  return nil, errs.Wrap(err, ERR_ID_RPC_QUIC_OPEN_STREAM)
 }
 
 var (

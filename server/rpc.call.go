@@ -1,19 +1,17 @@
-package rpc
+package svr
 
 import (
   "reflect"
-  "sync"
 
   "github.com/yolksys/emei/env"
-  "github.com/yolksys/emei/rpc/session"
 )
 
 // call ...
 func Call(e env.Env, svcName, met string, args ...any) error {
   defer e.Return()
 
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
   _, err := res.Values()
   return err
 }
@@ -22,8 +20,8 @@ func Call1[T1 any](e env.Env, svcName, met string, args ...any) (T1, error) {
   defer e.Return()
 
   t1 := reflect.TypeFor[T1]()
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(t1)
   return rvs[0].Interface().(T1), err
@@ -34,8 +32,8 @@ func Call2[T1, T2 any](e env.Env, svcName, met string, args ...any) (T1, T2, err
 
   t1 := reflect.TypeFor[T1]()
   t2 := reflect.TypeFor[T2]()
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(t1, t2)
 
@@ -49,8 +47,8 @@ func Call3[T1, T2, T3 any](e env.Env, svcName, met string,
 ) (T1, T2, T3, error) {
   defer e.Return()
 
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -65,8 +63,8 @@ func Call3[T1, T2, T3 any](e env.Env, svcName, met string,
 func Call4[T1, T2, T3, T4 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -83,8 +81,8 @@ func Call4[T1, T2, T3, T4 any](e env.Env, svcName, met string,
 func Call5[T1, T2, T3, T4, T5 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, T5, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -103,8 +101,8 @@ func Call5[T1, T2, T3, T4, T5 any](e env.Env, svcName, met string,
 func Call6[T1, T2, T3, T4, T5, T6 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, T5, T6, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -125,8 +123,8 @@ func Call6[T1, T2, T3, T4, T5, T6 any](e env.Env, svcName, met string,
 func Call7[T1, T2, T3, T4, T5, T6, T7 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, T5, T6, T7, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -149,8 +147,8 @@ func Call7[T1, T2, T3, T4, T5, T6, T7 any](e env.Env, svcName, met string,
 func Call8[T1, T2, T3, T4, T5, T6, T7, T8 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, T5, T6, T7, T8, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -175,8 +173,8 @@ func Call8[T1, T2, T3, T4, T5, T6, T7, T8 any](e env.Env, svcName, met string,
 func Call9[T1, T2, T3, T4, T5, T6, T7, T8, T9 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, T4, T5, T6, T7, T8, T9, error) {
-  res := send(e, svcName, met, args...)
-  defer res.Close()
+  res := talk(e, svcName, met, args...)
+  defer res.Release()
 
   rvs, err := res.Values(reflect.TypeFor[T1](),
     reflect.TypeFor[T2](),
@@ -199,40 +197,3 @@ func Call9[T1, T2, T3, T4, T5, T6, T7, T8, T9 any](e env.Env, svcName, met strin
     rvs[8].Interface().(T9),
     err
 }
-
-// ...
-func send(e env.Env, svc, met string, args ...any) resIx {
-  defer e.Return()
-
-  sess, err := session.DialSesn(svc, e)
-  e.AssertErr(err)
-  err = sess.SpeakV(newCallInfo(met))
-  e.AssertErr(err)
-  err = sess.SpeakV(args...)
-  e.AssertErr(err)
-  // return (*sessionResIx)(sess)
-  return nil
-}
-
-type resIx interface {
-  Values(typs ...reflect.Type) ([]reflect.Value, error)
-  Close()
-}
-
-type (
-  defaultResIx struct{ err error }
-)
-
-func (d *defaultResIx) Values(typs ...reflect.Type) (rets []reflect.Value, err error) {
-  rets = []reflect.Value{}
-  for _, v := range typs {
-    rets = append(rets, reflect.Zero(v))
-  }
-  err = d.err
-  return
-}
-
-func (d *defaultResIx) Close() {
-}
-
-var _sessionsMux = sync.RWMutex{}
