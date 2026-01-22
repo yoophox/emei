@@ -35,24 +35,6 @@ func init() {
   _logger = _logProvider.Logger(_scope + "logger")
   _meter = _metricProvider.Meter(_scope + "metric")
   _tracer = _traceProvider.Tracer(_scope + "trace")
-
-  _totalCnt, err = _meter.Int64Counter("total_call_counter")
-  if err != nil {
-    panic(err)
-  }
-  _nrpcCnt, err = _meter.Int64Counter("nrpc_call_counter")
-  if err != nil {
-    panic(err)
-  }
-  _webCnt, err = _meter.Int64Counter("web_call_counter")
-  if err != nil {
-    panic(err)
-  }
-  _grpcCnt, err = _meter.Int64Counter("grpc_call_counter")
-  if err != nil {
-    panic(err)
-  }
-
   // go spanEnder()
 }
 

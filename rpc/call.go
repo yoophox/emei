@@ -5,7 +5,7 @@ import (
   "sync"
 
   "github.com/yolksys/emei/env"
-  "github.com/yolksys/emei/errs"
+  "github.com/yolksys/emei/rpc/session"
 )
 
 // call ...
@@ -204,13 +204,14 @@ func Call9[T1, T2, T3, T4, T5, T6, T7, T8, T9 any](e env.Env, svcName, met strin
 func send(e env.Env, svc, met string, args ...any) resIx {
   defer e.Return()
 
-  sess, err := getSession(svc)
+  sess, err := session.DialSesn(svc, e)
   e.AssertErr(err)
-  err = sess.encode(newCallInfo(met))
+  err = sess.SpeakV(newCallInfo(met))
   e.AssertErr(err)
-  err = sess.encode(args...)
+  err = sess.SpeakV(args...)
   e.AssertErr(err)
-  return (*sessionResIx)(sess)
+  // return (*sessionResIx)(sess)
+  return nil
 }
 
 type resIx interface {
@@ -220,7 +221,6 @@ type resIx interface {
 
 type (
   defaultResIx struct{ err error }
-  sessionResIx session
 )
 
 func (d *defaultResIx) Values(typs ...reflect.Type) (rets []reflect.Value, err error) {
@@ -235,24 +235,4 @@ func (d *defaultResIx) Values(typs ...reflect.Type) (rets []reflect.Value, err e
 func (d *defaultResIx) Close() {
 }
 
-func (r *sessionResIx) Values(typs ...reflect.Type) (rets []reflect.Value, err error) {
-  rets, err = (*session)(r).decode(typs...)
-  return
-}
-
-func (r *sessionResIx) Close() {
-}
-
-var (
-  _sessionsForService = map[string]*session{}
-  _sessionsMux        = sync.RWMutex{}
-)
-
-// getSession ...
-func getSession(svc string) (s *session, err error) {
-  return
-}
-
-// ...
-func delSession(svc string) {
-}
+var _sessionsMux = sync.RWMutex{}

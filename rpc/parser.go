@@ -33,7 +33,12 @@ func parse(rc_ any) error {
 
     mt_ := m.Type
     // at least have three params: receiver, *env and another
-    if mt_.NumIn() < 3 {
+    if mt_.NumIn() < 2 {
+      continue
+    }
+
+    if mt_.NumIn() == 2 && (mt_.NumOut() == 0 ||
+      (mt_.NumOut() == 1 && mt_.Out(0) == typeOfError)) {
       continue
     }
 
@@ -47,7 +52,8 @@ func parse(rc_ any) error {
         if (j != mt_.NumIn()-1) ||
           ((pt_ != typeOfReader) &&
             (pt_ != typeOfWriter) &&
-            (pt_ != typeOfReaderWriter)) {
+            (pt_ != typeOfReaderWriter) &&
+            (pt_ != typeOfUpFiles)) {
           isLegalF = false
           break
         }

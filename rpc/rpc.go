@@ -2,17 +2,13 @@ package rpc
 
 import (
   "fmt"
-  "io"
   "reflect"
   "strings"
   "sync"
 
-  "github.com/yolksys/emei/env"
   "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/kube"
-  "github.com/yolksys/emei/log"
   "github.com/yolksys/emei/rpc/errors"
-  "github.com/yolksys/emei/rpc/net"
+  "github.com/yolksys/emei/rpc/session"
 )
 
 // RegRcvr ...
@@ -29,58 +25,28 @@ func Start(wg_ *sync.WaitGroup) error {
   wg_.Add(1)
   _wg = wg_
 
-  snet, err := kube.LookupNet("@@self")
-  if err != nil {
-    panic(err)
-  }
-  ch, err := net.Listen(":" + snet.Port)
+  ch, err := session.ListenSesn()
   if err != nil {
     panic(err)
   }
 
-  go func(ch <-chan io.ReadWriteCloser) {
-    for conn := range ch {
-      sess, err := newSession(conn)
-      if err != nil {
-        log.Event("handle new conn failed", err.Error())
-        continue
-      }
-
-      dispatch(sess)
+  go func(ch <-chan session.SesnIx) {
+    for v := range ch {
+      go callFunc(v)
     }
-
-    log.Event("!!!!!", "listen ch closed")
   }(ch)
 
   return nil
 }
 
-// dispatch ...
-func dispatch(sess *session) {
-  for {
-    e := env.New(sess)
-    go callFunc(e, sess)
-  }
-}
-
 // callFunc ...
-func callFunc(e env.Env, s *session) {
-  fps := make([]any, 0, 16)
-  action := func() error {
-    return s.encode(fps)
-  }
+func callFunc(sesn session.SesnIx) {
+  defer sesn.Finish()
 
-  e.Finish(action)
-  defer e.Finish()
-
+  e := sesn.Env()
   var ci_ CallInfo
-  err := s.Decode(&ci_)
-  if err != nil {
-    s.Close()
-    e.AssertErr(errs.Wrap(fmt.Errorf("read callinfo failed"),
-      errors.ERR_ID_RPC_DECODE_CALLINFO))
-    return
-  }
+  err := sesn.HearV(&ci_)
+  e.AssertErr(err, errors.ERR_ID_RPC_DECODE_CALLINFO)
 
   rvi := strings.Split(string(ci_), ".")
   if len(rvi) != 2 {
@@ -97,7 +63,7 @@ func callFunc(e env.Env, s *session) {
   if lpk == reflect.Interface {
     pty = pty[:len(pty)-1]
   }
-  params, err := s.decode(pty...)
+  params, err := sesn.Hear(pty...)
   e.AssertErr(err, errors.ERR_ID_RPC_DECODE_PARAMS)
   params = append([]reflect.Value{rcvr.value, reflect.ValueOf(e)}, params...)
   rets := met.Call(params)

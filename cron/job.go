@@ -24,5 +24,8 @@ func (i *job) Run() *time.Time {
   }
   t := time.Now()
   i.ct.Next(t)
+  if t.IsZero() {
+    return nil
+  }
   return &t
 }

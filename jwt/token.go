@@ -64,5 +64,10 @@ func (k *token) Sign() (string, error) {
   if err != nil {
     return "", errs.Wrap(err, ERR_ID_JWT_NO_PKI_ID)
   }
-  return k.SignedString(prikey)
+  s, err := k.SignedString(prikey)
+  if err == nil {
+    k.Raw = s
+  }
+
+  return s, err
 }

@@ -13,13 +13,13 @@ require (
 	go.opentelemetry.io/otel/sdk v1.36.0
 	go.opentelemetry.io/otel/sdk/log v0.12.2
 	go.opentelemetry.io/otel/trace v1.36.0
-	golang.org/x/sys v0.33.0 //indirect
+	golang.org/x/sys v0.35.0 //indirect
 )
 
 require (
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/pion/stun v0.6.1
-	github.com/quic-go/quic-go v0.52.0
+	github.com/quic-go/quic-go v0.59.0
 	github.com/sony/sonyflake/v2 v2.2.0
 	go.etcd.io/etcd/client/v3 v3.6.0
 	go.opentelemetry.io/otel v1.36.0
@@ -32,7 +32,10 @@ require (
 
 require github.com/golang-jwt/jwt/v5 v5.2.3
 
-require github.com/fsnotify/fsnotify v1.9.0 // indirect
+require (
+	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/quic-go/qpack v0.6.0 // indirect
+)
 
 require (
 	github.com/pion/datachannel v1.5.10 // indirect
@@ -92,18 +95,18 @@ require (
 	go.etcd.io/etcd/client/pkg/v3 v3.6.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.6.0 // indirect
-	go.uber.org/mock v0.5.0 // indirect
+	go.uber.org/mock v0.5.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.38.0 // indirect
-	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/net v0.40.0 //indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/net v0.43.0 //indirect
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sync v0.14.0 // indirect
-	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	golang.org/x/tools v0.32.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250519155744-55703ea1f237 // indirect
 	google.golang.org/grpc v1.72.1

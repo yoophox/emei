@@ -1,7 +1,7 @@
 package cron
 
 type Cron interface {
-  Add(spec string, f CronFunc, p ...any) Canceler
+  Add(spec string, f CronFunc, p ...any) (Canceler, error)
 }
 
 type Canceler func()
@@ -11,5 +11,5 @@ type CronFunc func(p ...any) string
 
 // New ...
 func New() Cron {
-  return nil
+  return _cron
 }

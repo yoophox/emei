@@ -7,7 +7,7 @@ import (
   "time"
 
   "github.com/quic-go/quic-go"
-  "github.com/yolksys/emei/env"
+  "github.com/yolksys/emei/errs"
   "github.com/yolksys/emei/pki"
   "github.com/yolksys/emei/rpc/errors"
 )
@@ -25,9 +25,13 @@ func Dial(addr string) (io.ReadWriteCloser, error) {
       ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) // 3s handshake timeout
       defer cancel()
       var err error
-      c, err = quic.DialAddrEarly(ctx, addr, pki.NewClientTlsConfig(), &quic.Config{Allow0RTT: true})
+      tlsc, err := pki.NewClientTlsConfig()
       if err != nil {
-        return nil, env.Errorf(errors.ERR_ID_RPC_QUIC_DIAL_EARLY, err)
+        return nil, err
+      }
+      c, err = quic.DialAddrEarly(ctx, addr, tlsc, &quic.Config{Allow0RTT: true})
+      if err != nil {
+        return nil, errs.Wrap(err, errors.ERR_ID_RPC_QUIC_DIAL_EARLY)
       }
 
       _conns[addr] = c
@@ -45,10 +49,10 @@ func Dial(addr string) (io.ReadWriteCloser, error) {
   _mtx.Lock()
   delete(_conns, addr)
   _mtx.Unlock()
-  return nil, env.Errorf(errors.ERR_ID_RPC_QUIC_OPEN_STREAM, err)
+  return nil, errs.Wrap(err, errors.ERR_ID_RPC_QUIC_OPEN_STREAM)
 }
 
 var (
   _mtx   = sync.RWMutex{}
-  _conns = map[string]quic.EarlyConnection{}
+  _conns = map[string]*quic.Conn{}
 )

@@ -14,7 +14,9 @@ var (
 // Precompute the reflect type for error.
 var (
   typeOfError        = reflect.TypeFor[error]()
-  typeOfReader       = reflect.TypeFor[io.Reader]()
-  typeOfWriter       = reflect.TypeFor[io.Writer]()
-  typeOfReaderWriter = reflect.TypeFor[io.ReadWriter]()
+  typeOfReader       = reflect.TypeFor[io.ReadCloser]()
+  typeOfWriter       = reflect.TypeFor[io.WriteCloser]()
+  typeOfReaderWriter = reflect.TypeFor[io.ReadWriteCloser]()
+  typeOfWebsock      = reflect.TypeFor[WebSock]()
+  typeOfUpFiles      = reflect.TypeFor[UpFiles]()
 )

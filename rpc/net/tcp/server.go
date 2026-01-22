@@ -5,17 +5,22 @@ import (
   "io"
   "net"
 
-  "github.com/yolksys/emei/env"
+  "github.com/yolksys/emei/errs"
   "github.com/yolksys/emei/log"
   "github.com/yolksys/emei/pki"
   "github.com/yolksys/emei/rpc/errors"
 )
 
-// Listem ...
-func Listem(addr string, ch chan io.ReadWriteCloser) error {
-  l, err := tls.Listen("tcp", addr, pki.NewServerTlsConfig())
+// Listen ...
+func Listen(addr string, ch chan io.ReadWriteCloser) error {
+  tlsc, err := pki.NewServerTlsConfig()
   if err != nil {
-    return env.Errorf(errors.ERR_ID_RPC_TCP_LISTEN, err)
+    return errs.Wrap(err, errors.ERR_ID_RPC_TCP_LISTEN)
+  }
+  tlsc.NextProtos = []string{"h2"}
+  l, err := tls.Listen("tcp", addr, tlsc)
+  if err != nil {
+    return errs.Wrap(err, errors.ERR_ID_RPC_TCP_LISTEN)
   }
 
   go accept(l, ch)

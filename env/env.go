@@ -4,7 +4,6 @@ import (
   "context"
   "fmt"
   "path"
-  "reflect"
   "sync"
 
   "github.com/yolksys/emei/errs"
@@ -20,43 +19,31 @@ type env struct {
   // Cf_ []func()        // callback
   // Ecf []func()        // error call back
   // ReV []reflect.Value // return values
-  Par  *env   // up env
-  tjax Tjatse // trace info for oepntele
+  Par  *env    // up env
+  tjax *Tjatse // trace info for oepntele
 
   span otel.Span
   // rpc   string
   // met   string
   // meter otel.Meter
-  err     error
-  actions []Action
-  jwt     jwt.JWT
+  err error
+  jwt jwt.JWT
 }
 
 // New ...
-func new(crr ...Carrier) *env {
+func new(tja *Tjatse) *env {
   e := pool.Get().(*env)
   e.Logger = log.New(context.Background(), core.WithCacheMode())
   e.Logger.CallerSkip(envLogSkip)
   e.Logger.Event("*", "start")
 
-  if e.actions == nil {
-    e.actions = []Action{}
-  } else {
-    e.actions = e.actions[:0]
-  }
-
   //
-  if crr != nil {
-    err := crr[0].Extract(&e.tjax)
-    if err != nil {
-      e.err = errs.Wrap(err, ERR_ID_ENV_EXTRACT)
-      return e
-    }
+  if tja != nil {
+    e.tjax = tja
   } else {
-    e.tjax.Mid = ""
+    e.tjax = &Tjatse{}
   }
-
-  e.span = otel.Trace(&e.tjax)
+  e.span = otel.Trace(e.tjax)
   if e.span == nil {
     e.AddAttri("uid", e.uid())
     e.AddAttri("uname", e.uname())
@@ -68,14 +55,7 @@ func new(crr ...Carrier) *env {
 }
 
 // Finish ...
-func (e *env) Finish(actf ...Action) {
-  if actf != nil {
-    for _, f := range actf {
-      e.actions = append(e.actions, f)
-    }
-
-    return
-  }
+func (e *env) Finish() {
   defer e.Release()
   defer e.Logger.Flush()
   defer func() {
@@ -108,21 +88,6 @@ func (e *env) Finish(actf ...Action) {
   }
 
   e.Logger.CallerSkip(envLogSkip)
-
-  if e.err != nil || len(e.actions) > 0 {
-    err := e.Propagate()
-    if err != nil {
-      e.Error("env propagate", err.Error())
-    }
-  }
-
-  for _, f := range e.actions {
-    err := f()
-    if err != nil {
-      e.Error("env action:"+reflect.TypeOf(f).Name(), err.Error())
-      break
-    }
-  }
 }
 
 func (e *env) Return() {
@@ -166,9 +131,13 @@ func (e *env) ResetErr() {
   e.err = nil
 }
 
-func (e *env) AssertErr(err error) {
+func (e *env) AssertErr(err error, errid ...errs.ErrId) {
   if err == nil {
     return
+  }
+
+  if len(errid) == 1 {
+    err = errs.Wrap(err, errid[0])
   }
 
   // for _, value := range clear {
@@ -196,13 +165,30 @@ func (e *env) AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any) {
   panic("")
 }
 
-func (e *env) Propagate(crr ...Carrier) error {
+func (e *env) TID() string {
   if e.span != nil {
-    e.tjax.SetSID(e.span.SID())
-    e.tjax.SetTID(e.span.TID())
+    return e.span.TID()
   }
 
-  return nil
+  return ""
+}
+
+func (e *env) JWT(j ...any) jwt.JWT {
+  if len(j) == 1 {
+    switch j_ := j[0].(type) {
+    case string:
+      e.jwt = jwt.Parse(j_)
+      e.tjax.Jwt = j_
+    case jwt.JWT:
+      e.jwt = j_
+    }
+  }
+
+  if e.jwt == nil {
+    e.jwt = jwt.Parse(e.tjax.Jwt)
+  }
+
+  return e.jwt
 }
 
 func (e *env) uid() string {

@@ -23,7 +23,7 @@ import (
 
 type local struct {
   cryptos map[uint64]*cryptosx
-  crps    map[uint64]*cryptosx // key = type: rsa
+  crps    map[string][]*cryptosx // key = type: rsa
 }
 
 // newLocal ...
@@ -44,7 +44,7 @@ func newLocalBackend() *local {
   var c *cryptosx
   var pril, publ int
 
-  l := &local{cryptos: map[uint64]*cryptosx{}, crps: map[uint64]*cryptosx{}}
+  l := &local{cryptos: map[uint64]*cryptosx{}, crps: map[string][]*cryptosx{}}
   for line, err := fsc.ReadBytes('\n'); ; line, err = fsc.ReadBytes('\n') {
     if err != nil {
       if err == io.EOF {
@@ -102,7 +102,11 @@ func newLocalBackend() *local {
     }
     c.Pri = prib
     c.Pub = pubb
-    l.crps[cid_] = c
+    _, ok := l.crps[c.Typ]
+    if !ok {
+      l.crps[c.Typ] = []*cryptosx{}
+    }
+    l.crps[c.Typ] = append(l.crps[c.Typ], c)
     l.cryptos[cid_] = c
 
     c = nil

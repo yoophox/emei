@@ -51,8 +51,8 @@ func (s *span) AddAttri(key, value string) {
 // --------------------------------------------------------
 // for meter
 func (m *meter) End() {
-  c, ok := _apiRealTimeCnt[m.key]
-  if ok {
-    c.Add(context.Background(), -1)
-  }
+  // c, ok := _apiRealTimeCnt[m.key]
+  // if ok {
+  //   c.Add(context.Background(), -1)
+  // }
 }

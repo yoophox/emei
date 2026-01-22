@@ -6,6 +6,7 @@ import (
   "github.com/yolksys/emei/cfg"
   "github.com/yolksys/emei/utils"
   "go.opentelemetry.io/otel/log"
+  "go.opentelemetry.io/otel/metric"
 )
 
 // Trace ...
@@ -66,7 +67,7 @@ func InitAllUpDownCounter(args ...string) {
 
     key := args[i]
     var err error
-    _allMeters[key], err = _meter.Int64UpDownCounter(key)
+    _allMeters[key], err = _meter.Int64UpDownCounter(key, metric.WithDescription(args[i+1]))
     if err != nil {
       panic(err)
     }
