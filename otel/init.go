@@ -10,8 +10,8 @@ import (
   "go.opentelemetry.io/otel/sdk/metric"
   "go.opentelemetry.io/otel/sdk/trace"
 
-  "github.com/yolksys/emei/kube"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/kube"
+  "github.com/yoophox/emei/utils"
   "go.opentelemetry.io/otel/sdk/resource"
 )
 

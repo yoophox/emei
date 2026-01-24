@@ -8,8 +8,8 @@ import (
   "strings"
   "time"
 
-  "github.com/yolksys/emei/etc"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/etc"
+  "github.com/yoophox/emei/utils"
 )
 
 type conn struct {

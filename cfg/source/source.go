@@ -4,9 +4,9 @@ import (
   "errors"
   "fmt"
 
-  "github.com/yolksys/emei/cfg/source/cetc"
-  "github.com/yolksys/emei/cfg/source/inter"
-  "github.com/yolksys/emei/cfg/source/local"
+  "github.com/yoophox/emei/cfg/source/cetc"
+  "github.com/yoophox/emei/cfg/source/inter"
+  "github.com/yoophox/emei/cfg/source/local"
 )
 
 // Load ...

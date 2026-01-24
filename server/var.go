@@ -4,9 +4,8 @@ import (
   "io"
   "net/http"
   "reflect"
-  "sync"
 
-  "github.com/yolksys/emei/env"
+  "github.com/yoophox/emei/env"
 )
 
 const (
@@ -37,7 +36,7 @@ const (
 var (
   _rpcRecvs = map[string]*rcvrTx{}
   _webRecvs = map[string]*rcvrTx{}
-  _wg       *sync.WaitGroup
+  //_wg       *sync.WaitGroup
 )
 
 // Precompute the reflect type for error.
@@ -50,4 +49,10 @@ var (
   typeOfWebRes       = reflect.TypeFor[WebResponse]()
   typeOfRequest      = reflect.TypeFor[*http.Request]()
   typeOfEnv          = reflect.TypeFor[env.Env]()
+)
+
+var _rootEnv = env.New(nil)
+
+const (
+  _RPC_TIMEOUT = 5 // second
 )

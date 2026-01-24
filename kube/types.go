@@ -3,7 +3,7 @@ package kube
 import (
   "sync"
 
-  "github.com/yolksys/emei/cfg"
+  "github.com/yoophox/emei/cfg"
 )
 
 type Server struct {

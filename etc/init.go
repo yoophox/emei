@@ -3,11 +3,11 @@ package etc
 import (
   "strings"
 
-  "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/cfg/source/cetc"
-  "github.com/yolksys/emei/cla"
-  "github.com/yolksys/emei/etc/dns"
-  "github.com/yolksys/emei/etc/etcintra"
+  "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/cfg/source/cetc"
+  "github.com/yoophox/emei/cla"
+  "github.com/yoophox/emei/etc/dns"
+  "github.com/yoophox/emei/etc/etcintra"
 )
 
 func init() {

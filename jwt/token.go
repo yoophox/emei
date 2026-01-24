@@ -4,8 +4,8 @@ import (
   "fmt"
 
   "github.com/golang-jwt/jwt/v5"
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/pki"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/pki"
 )
 
 type token struct {

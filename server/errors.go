@@ -1,6 +1,6 @@
 package svr
 
-import "github.com/yolksys/emei/errs"
+import "github.com/yoophox/emei/errs"
 
 const (
   ERR_ID_RPC_QUIC_LISTEN      errs.ErrId = "err.rpc.quic.listen"
@@ -16,6 +16,9 @@ const (
   ERR_ID_RPC_DECODE_CALLINFO  errs.ErrId = "err.rpc.decode.callinfo"
   ERR_ID_RPC_CALLINFO_LEN     errs.ErrId = "err.rpc.callinfo.len"
   ERR_ID_RPC_CALLINFO_RCVR    errs.ErrId = "err.rpc.callinfo.rcvr"
+  ERR_ID_RPC_CALL_ERROR       errs.ErrId = "err.rpc.call.error"
   ERR_ID_RPC_CALLINFO_METH    errs.ErrId = "err.rpc.callinfo.meth"
   ERR_ID_RPC_DECODE_PARAMS    errs.ErrId = "err.rpc.decode.params"
+  ERR_ID_WEB_NEW_SOCKET       errs.ErrId = "err.web.new.socket"
+  ERR_ID_WEB_NOT_WS_CALL      errs.ErrId = "err.web.not.ws.call"
 )

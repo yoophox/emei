@@ -6,8 +6,8 @@ import (
   "fmt"
   "unicode"
 
-  "github.com/yolksys/emei/cfg/source/inter"
-  "github.com/yolksys/emei/cfg/values"
+  "github.com/yoophox/emei/cfg/source/inter"
+  "github.com/yoophox/emei/cfg/values"
   "github.com/tidwall/gjson"
 )
 

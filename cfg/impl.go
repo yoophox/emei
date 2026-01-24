@@ -3,7 +3,7 @@ package cfg
 import (
   "time"
 
-  "github.com/yolksys/emei/cfg/values"
+  "github.com/yoophox/emei/cfg/values"
 )
 
 type config struct {

@@ -5,7 +5,7 @@ import (
   "reflect"
   "strings"
 
-  "github.com/yolksys/emei/log"
+  "github.com/yoophox/emei/log"
 )
 
 // ...
@@ -135,33 +135,33 @@ func isBuildinAtom(t reflect.Type) bool {
 }
 
 // getEeleTye ...
-func getElemTye(typ reflect.Type) reflect.Type {
-  // typ := reflect.TypeOf(v)
-  k := typ.Kind()
-  for {
-    if k == reflect.Array ||
-      k == reflect.Pointer ||
-      k == reflect.Slice {
-      typ = typ.Elem()
-      k = typ.Kind()
-      continue
-    }
-    return typ
-  }
-}
+//func getElemTye(typ reflect.Type) reflect.Type {
+//  // typ := reflect.TypeOf(v)
+//  k := typ.Kind()
+//  for {
+//    if k == reflect.Array ||
+//      k == reflect.Pointer ||
+//      k == reflect.Slice {
+//      typ = typ.Elem()
+//      k = typ.Kind()
+//      continue
+//    }
+//    return typ
+//  }
+//}
 
 // getElemKind ...
-func getElemKind(typ reflect.Type) reflect.Kind {
-  // typ := reflect.TypeOf(v)
-  k := typ.Kind()
-  for {
-    if k == reflect.Array ||
-      k == reflect.Pointer ||
-      k == reflect.Slice {
-      typ = typ.Elem()
-      k = typ.Kind()
-      continue
-    }
-    return k
-  }
-}
+// func getElemKind(typ reflect.Type) reflect.Kind {
+//   // typ := reflect.TypeOf(v)
+//   k := typ.Kind()
+//   for {
+//     if k == reflect.Array ||
+//       k == reflect.Pointer ||
+//       k == reflect.Slice {
+//       typ = typ.Elem()
+//       k = typ.Kind()
+//       continue
+//     }
+//     return k
+//   }
+// }

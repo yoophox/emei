@@ -1,6 +1,6 @@
 package pki
 
-import "github.com/yolksys/emei/cron"
+import "github.com/yoophox/emei/cron"
 
 type cryptoCache struct {
   cryptos map[string]*cryptosx

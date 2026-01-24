@@ -3,8 +3,8 @@ package otel
 import (
   "context"
 
-  "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/utils"
   "go.opentelemetry.io/otel/log"
   "go.opentelemetry.io/otel/metric"
 )

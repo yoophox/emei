@@ -8,9 +8,9 @@ import (
   "strings"
   "sync"
 
-  "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/cla"
-  "github.com/yolksys/emei/kube/resolver"
+  "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/cla"
+  "github.com/yoophox/emei/kube/resolver"
 )
 
 var (

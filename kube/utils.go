@@ -3,7 +3,7 @@ package kube
 import (
   "fmt"
 
-  "github.com/yolksys/emei/cfg"
+  "github.com/yoophox/emei/cfg"
 )
 
 // getSvcCfg ...

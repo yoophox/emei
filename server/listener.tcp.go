@@ -5,13 +5,13 @@ import (
   "crypto/tls"
   "net"
 
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/log"
-  "github.com/yolksys/emei/pki"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/log"
+  "github.com/yoophox/emei/pki"
 )
 
 // Listen ...
-func Listen(addr string) error {
+func listenTcp(addr string) error {
   tlsc, err := pki.NewServerTlsConfig()
   if err != nil {
     return errs.Wrap(err, ERR_ID_RPC_TCP_LISTEN)
@@ -46,10 +46,10 @@ func acceptTcp(l net.Listener) {
     switch tlsc.ConnectionState().NegotiatedProtocol {
     case string(RPC_ALP_GOB):
       cc = newGobCodec(c)
-      go dispatchRpc(&linkTx{cc: cc, ReadWriteCloser: c, pol: nil})
+      go dispatchRpc(&linkTx{cc: cc, Conn: c, pol: nil})
     case string(RPC_ALP_JSON):
       cc = newJsonCodec(c)
-      go dispatchRpc(&linkTx{cc: cc, ReadWriteCloser: c, pol: nil})
+      go dispatchRpc(&linkTx{cc: cc, Conn: c, pol: nil})
     default:
       panic("not support alp:" + tlsc.ConnectionState().NegotiatedProtocol)
     }

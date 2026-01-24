@@ -5,7 +5,7 @@ import (
   "reflect"
   "strings"
 
-  "github.com/yolksys/emei/log"
+  "github.com/yoophox/emei/log"
 )
 
 func parseWeb(rcvr any) error {

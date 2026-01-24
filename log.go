@@ -1,6 +1,6 @@
 package emei
 
-import "github.com/yolksys/emei/log"
+import "github.com/yoophox/emei/log"
 
 var (
   Log    = log.Log

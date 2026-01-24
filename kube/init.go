@@ -3,8 +3,8 @@ package kube
 import (
   "strings"
 
-  "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/cla"
+  "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/cla"
 )
 
 func init() {

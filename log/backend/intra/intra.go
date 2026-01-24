@@ -3,7 +3,7 @@ package intra
 import (
   "context"
 
-  "github.com/yolksys/emei/log/cache"
+  "github.com/yoophox/emei/log/cache"
 )
 
 type Backend interface {

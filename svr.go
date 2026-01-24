@@ -1,9 +1,8 @@
 package emei
 
-import svr "github.com/yolksys/emei/server"
+import svr "github.com/yoophox/emei/server"
 
 // server
 var (
-  RegRcvr = svr.RegRcvr
-  Serve   = svr.Serve
+  Serve = svr.Serve
 )

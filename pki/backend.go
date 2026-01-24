@@ -3,7 +3,7 @@ package pki
 import (
   "encoding/pem"
 
-  "github.com/yolksys/emei/cla"
+  "github.com/yoophox/emei/cla"
 )
 
 type backend interface {

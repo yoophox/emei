@@ -2,17 +2,17 @@ package svr
 
 import (
   "context"
-  "io"
+  "net"
   "sync"
   "time"
 
   "github.com/quic-go/quic-go"
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/pki"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/pki"
 )
 
 // Dial ...
-func dialQuic(addr string) (io.ReadWriteCloser, error) {
+func dialQuic(addr string) (net.Conn, error) {
   _mtx.RLock()
   c, ok := _conns[addr]
   if !ok {
@@ -42,7 +42,7 @@ func dialQuic(addr string) (io.ReadWriteCloser, error) {
 
   s, err := c.OpenStream()
   if err == nil {
-    return s, nil
+    return wrapQuicConn(s, c), nil
   }
 
   c.CloseWithError(quic.ApplicationErrorCode(quic.ApplicationErrorErrorCode), "open stream error")

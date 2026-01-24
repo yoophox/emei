@@ -4,8 +4,8 @@ import (
   "fmt"
   "time"
 
-  "github.com/yolksys/emei/log/cache"
-  "github.com/yolksys/emei/log/fmt/json"
+  "github.com/yoophox/emei/log/cache"
+  "github.com/yoophox/emei/log/fmt/json"
 )
 
 func serialize(buf []byte, cont ...interface{}) cache.Content {

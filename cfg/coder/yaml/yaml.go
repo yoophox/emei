@@ -7,8 +7,8 @@ import (
   "sync"
 
   yaml "github.com/goccy/go-yaml"
-  "github.com/yolksys/emei/cfg/source/inter"
-  "github.com/yolksys/emei/cfg/values"
+  "github.com/yoophox/emei/cfg/source/inter"
+  "github.com/yoophox/emei/cfg/values"
 )
 
 // Encoder ...

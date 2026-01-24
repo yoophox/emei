@@ -6,12 +6,12 @@ import (
   "path"
   "sync"
 
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/jwt"
-  "github.com/yolksys/emei/log"
-  "github.com/yolksys/emei/log/core"
-  "github.com/yolksys/emei/otel"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/jwt"
+  "github.com/yoophox/emei/log"
+  "github.com/yoophox/emei/log/core"
+  "github.com/yoophox/emei/otel"
+  "github.com/yoophox/emei/utils"
 )
 
 type env struct {
@@ -19,15 +19,18 @@ type env struct {
   // Cf_ []func()        // callback
   // Ecf []func()        // error call back
   // ReV []reflect.Value // return values
-  Par  *env    // up env
+  par  *env    // up env
   tjax *Tjatse // trace info for oepntele
 
   span otel.Span
   // rpc   string
   // met   string
   // meter otel.Meter
-  err error
-  jwt jwt.JWT
+  err    error
+  jwt    jwt.JWT
+  wgx    sync.WaitGroup
+  ctx    context.Context
+  isDone bool
 }
 
 // New ...
@@ -36,6 +39,7 @@ func new(tja *Tjatse) *env {
   e.Logger = log.New(context.Background(), core.WithCacheMode())
   e.Logger.CallerSkip(envLogSkip)
   e.Logger.Event("*", "start")
+  e.wgx.Add(1)
 
   //
   if tja != nil {
@@ -47,9 +51,10 @@ func new(tja *Tjatse) *env {
   if e.span == nil {
     e.AddAttri("uid", e.uid())
     e.AddAttri("uname", e.uname())
-    return e
+  } else {
+    e.Logger.SetTraceId(e.span.TID())
+    e.Logger.AddAttri("spanid", e.span.SID())
   }
-  e.Logger.SetTraceId(e.span.TID())
 
   return e
 }
@@ -90,7 +95,7 @@ func (e *env) Finish() {
   e.Logger.CallerSkip(envLogSkip)
 }
 
-func (e *env) Return() {
+func (e *env) Trace() {
   r := recover()
   if r == nil {
     e.Logger.Event("*", "returned")
@@ -110,9 +115,9 @@ func (e *env) Return() {
 }
 
 func (e *env) Release() {
+  e.Logger.Flush()
   log.Release(e.Logger)
   pool.Put(e)
-  return
 }
 
 func (e *env) Assert() {
@@ -159,10 +164,21 @@ func (e *env) AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any) {
     return
   }
 
-  err := fmt.Errorf(fmt_, args)
+  err := fmt.Errorf(fmt_, args...)
   e.Logger.Error("msg", err)
   e.err = errs.Wrap(err, eid)
   panic("")
+}
+
+func (e *env) Clone() *env {
+  var e_ env
+  var tja Tjatse
+  tja = *e.tjax
+  e.tjax = &tja
+  e.par = e
+  e.span = otel.Trace(&tja)
+  e.Logger = log.New(context.Background(), log.WithCacheMode)
+  return &e_
 }
 
 func (e *env) Err() error {
@@ -193,6 +209,33 @@ func (e *env) JWT(j ...any) jwt.JWT {
   }
 
   return e.jwt
+}
+
+func (e *env) Done() <-chan struct{} {
+  return e.ctx.Done()
+}
+
+func (e *env) IsDone() bool {
+  return e.ctx.Err() != nil
+}
+
+func (e *env) Go(f any, args ...any) {
+  e.wgx.Add(1)
+  go func() {
+    e_ := e.Clone()
+    defer func() {
+      e_.Release()
+      e.wgx.Done()
+    }()
+    // f(args...)
+  }()
+}
+
+func (e *env) Wait() {
+  e.wgx.Wait()
+}
+
+func (e *env) WaitAny() {
 }
 
 func (e *env) uid() string {

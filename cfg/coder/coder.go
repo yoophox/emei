@@ -4,11 +4,11 @@ import (
   "errors"
   "fmt"
 
-  "github.com/yolksys/emei/cfg/coder/cfgc"
-  "github.com/yolksys/emei/cfg/coder/ckube"
-  "github.com/yolksys/emei/cfg/coder/yaml"
-  "github.com/yolksys/emei/cfg/source/inter"
-  "github.com/yolksys/emei/cfg/values"
+  "github.com/yoophox/emei/cfg/coder/cfgc"
+  "github.com/yoophox/emei/cfg/coder/ckube"
+  "github.com/yoophox/emei/cfg/coder/yaml"
+  "github.com/yoophox/emei/cfg/source/inter"
+  "github.com/yoophox/emei/cfg/values"
 )
 
 // encoder ...

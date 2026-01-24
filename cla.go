@@ -1,6 +1,6 @@
 package emei
 
-import "github.com/yolksys/emei/cla"
+import "github.com/yoophox/emei/cla"
 
 var (
   AssertCmd = cla.Assert

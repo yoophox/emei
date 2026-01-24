@@ -4,8 +4,8 @@ import (
   "context"
   "os"
 
-  "github.com/yolksys/emei/log/backend/intra"
-  "github.com/yolksys/emei/log/cache"
+  "github.com/yoophox/emei/log/backend/intra"
+  "github.com/yoophox/emei/log/cache"
 )
 
 type console struct {

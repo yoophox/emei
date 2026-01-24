@@ -1,5 +1,5 @@
 package emei
 
-import "github.com/yolksys/emei/cfg"
+import "github.com/yoophox/emei/cfg"
 
 var NewCfg = cfg.New

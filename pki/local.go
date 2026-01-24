@@ -18,7 +18,7 @@ import (
   "strconv"
 
   "github.com/fsnotify/fsnotify"
-  "github.com/yolksys/emei/errs"
+  "github.com/yoophox/emei/errs"
 )
 
 type local struct {

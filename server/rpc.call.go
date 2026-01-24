@@ -3,12 +3,12 @@ package svr
 import (
   "reflect"
 
-  "github.com/yolksys/emei/env"
+  "github.com/yoophox/emei/env"
 )
 
 // call ...
 func Call(e env.Env, svcName, met string, args ...any) error {
-  defer e.Return()
+  defer e.Trace()
 
   res := talk(e, svcName, met, args...)
   defer res.Release()
@@ -17,7 +17,7 @@ func Call(e env.Env, svcName, met string, args ...any) error {
 }
 
 func Call1[T1 any](e env.Env, svcName, met string, args ...any) (T1, error) {
-  defer e.Return()
+  defer e.Trace()
 
   t1 := reflect.TypeFor[T1]()
   res := talk(e, svcName, met, args...)
@@ -28,7 +28,7 @@ func Call1[T1 any](e env.Env, svcName, met string, args ...any) (T1, error) {
 }
 
 func Call2[T1, T2 any](e env.Env, svcName, met string, args ...any) (T1, T2, error) {
-  defer e.Return()
+  defer e.Trace()
 
   t1 := reflect.TypeFor[T1]()
   t2 := reflect.TypeFor[T2]()
@@ -45,7 +45,7 @@ func Call2[T1, T2 any](e env.Env, svcName, met string, args ...any) (T1, T2, err
 func Call3[T1, T2, T3 any](e env.Env, svcName, met string,
   args ...any,
 ) (T1, T2, T3, error) {
-  defer e.Return()
+  defer e.Trace()
 
   res := talk(e, svcName, met, args...)
   defer res.Release()

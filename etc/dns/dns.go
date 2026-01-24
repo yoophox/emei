@@ -5,9 +5,9 @@ import (
   "math/rand"
   "sync"
 
-  "github.com/yolksys/emei/etc/etcintra"
-  "github.com/yolksys/emei/etc/etcout"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/etc/etcintra"
+  "github.com/yoophox/emei/etc/etcout"
+  "github.com/yoophox/emei/utils"
 )
 
 // Start ...

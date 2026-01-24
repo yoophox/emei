@@ -1,6 +1,6 @@
 package jwt
 
-import "github.com/yolksys/emei/errs"
+import "github.com/yoophox/emei/errs"
 
 const (
   ERR_ID_JWT_NO_HEADER   errs.ErrId = "err.jwt.no.header"

@@ -4,9 +4,9 @@ import (
   "context"
   "time"
 
-  "github.com/yolksys/emei/log/backend/intra"
-  "github.com/yolksys/emei/log/cache"
-  rotel "github.com/yolksys/emei/otel"
+  "github.com/yoophox/emei/log/backend/intra"
+  "github.com/yoophox/emei/log/cache"
+  rotel "github.com/yoophox/emei/otel"
 )
 
 type otel struct {
@@ -30,26 +30,23 @@ func (b *otel) Write(msg *cache.LogRecord) {
 
 // do ...
 func do(c chan *cache.LogRecord) {
-  for {
-    select {
-    case m := <-c:
-      lr_ := &rotel.LogRecord{}
-      lr_.SetBody(rotel.LogStringValue(string(m.Buf)))
-      lr_.SetTimestamp(time.Now())
-      // t, _ := rotel.LogTraceIdFromHex(m.TraceId)
-      // lr_.SetTraceID(t)
+  for m := range c {
+    lr_ := &rotel.LogRecord{}
+    lr_.SetBody(rotel.LogStringValue(string(m.Buf)))
+    lr_.SetTimestamp(time.Now())
+    // t, _ := rotel.LogTraceIdFromHex(m.TraceId)
+    // lr_.SetTraceID(t)
+    lr_.AddAttributes(rotel.LogKV{
+      Key:   "traceID",
+      Value: rotel.LogStringValue(m.TraceId),
+    })
+    for key, value := range m.Attris {
       lr_.AddAttributes(rotel.LogKV{
-        Key:   "traceID",
-        Value: rotel.LogStringValue(m.TraceId),
+        Key:   key,
+        Value: rotel.LogStringValue(value),
       })
-      for key, value := range m.Attris {
-        lr_.AddAttributes(rotel.LogKV{
-          Key:   key,
-          Value: rotel.LogStringValue(value),
-        })
-      }
-      rotel.Log(lr_)
     }
+    rotel.Log(lr_)
   }
 }
 

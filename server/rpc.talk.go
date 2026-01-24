@@ -3,14 +3,15 @@ package svr
 import (
   "runtime"
   "sync"
+  "time"
 
-  "github.com/yolksys/emei/env"
-  "github.com/yolksys/emei/kube"
+  "github.com/yoophox/emei/env"
+  "github.com/yoophox/emei/kube"
 )
 
 // talk ...
 func talk(e env.Env, peer string, topic string, content ...any) resIx {
-  defer e.Return()
+  defer e.Trace()
   l, err := getLink(peer)
   if err != nil {
     return &defaultResIx{err: err}
@@ -21,6 +22,8 @@ func talk(e env.Env, peer string, topic string, content ...any) resIx {
     Jwt: e.JWT().Raw(),
   }
 
+  l.Conn.SetWriteDeadline(time.Now().Add(_RPC_TIMEOUT * time.Second))
+
   err = l.cc.Encode(&tja)
   if err != nil {
     return &defaultResIx{err}
@@ -30,6 +33,14 @@ func talk(e env.Env, peer string, topic string, content ...any) resIx {
     return &defaultResIx{err}
   }
 
+  for _, v := range content {
+    err = l.cc.Encode(v)
+    if err != nil {
+      return &defaultResIx{err}
+    }
+  }
+
+  l.SetReadDeadline(time.Now().Add(_RPC_TIMEOUT * time.Second))
   return l
 }
 
@@ -72,7 +83,7 @@ func poolOrNew(p *sync.Pool, svc string) (*linkTx, error) {
   }
 
   fin := func(l *linkTx) {
-    l.ReadWriteCloser.Close()
+    l.Conn.Close()
   }
   cc := newGobCodec(conn)
   l := &linkTx{cc, conn, p, false}

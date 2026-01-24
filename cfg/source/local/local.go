@@ -5,7 +5,7 @@ import (
   "fmt"
   "os"
 
-  "github.com/yolksys/emei/cfg/source/inter"
+  "github.com/yoophox/emei/cfg/source/inter"
 )
 
 // Load ...

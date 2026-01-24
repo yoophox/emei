@@ -1,22 +1,24 @@
 package svr
 
 import (
-  "io"
+  "net"
   "net/http"
   "reflect"
   "sync"
   "time"
+
+  "github.com/quic-go/quic-go"
 )
 
 type (
   WebSock interface {
-    ReadMessag() (msgTyp int, b []byte, err error)
+    ReadMessage() (msgTyp int, b []byte, err error)
     ReadJSON(v any) error
-    WriteMessag(msgTyp int, b []byte) error
+    WriteMessage(msgTyp int, b []byte) error
     WriteJSON(v any) error
-    SetDeadTime(t time.Time) error
-    SetReadDeadTime(t time.Time) error
-    SetWriteDeadTime(t time.Time) error
+    // SetDeadline(t time.Time) error
+    SetReadDeadline(t time.Time) error
+    SetWriteDeadline(t time.Time) error
     Close() error
   }
 
@@ -48,9 +50,10 @@ type (
 
 type linkTx struct {
   cc codecIx
-  io.ReadWriteCloser
+  // io.ReadWriteCloser
+  net.Conn
   pol        *sync.Pool
-  isStreamed bool
+  isReleased bool
 }
 
 type (
@@ -58,4 +61,13 @@ type (
   netTx     byte
 )
 
-type webResponsImpl struct{}
+type quicConn struct {
+  *quic.Stream
+  *quic.Conn
+}
+
+type webResponsImpl struct {
+  headers map[string]string
+  cookies []*http.Cookie
+  content [][]byte
+}

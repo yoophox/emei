@@ -2,12 +2,12 @@ package core
 
 import (
   "context"
+  "strings"
   "sync"
 
-  "github.com/yolksys/emei/cfg"
-  "github.com/yolksys/emei/log/backend"
-  "github.com/yolksys/emei/log/cache"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/cla"
+  "github.com/yoophox/emei/log/backend"
+  "github.com/yoophox/emei/log/cache"
 )
 
 // Level defines log levels.
@@ -255,10 +255,14 @@ var (
 func init() {
   // new backends due to cfg
   var bcds []string
-  err := cfg.GetCfgItem("logger.level", &level)
-  utils.AssertErr(err)
-  err = cfg.GetCfgItem("logger.backends", &bcds)
-  utils.AssertErr(err)
+  level = Level(cla.Int64("log.level", "log level", int64(DebugLevel)))
+  // format: "b,b,b"
+  bcdS := cla.String("log.bcds", "log backens", "")
+  if bcdS == "" {
+    bcds = []string{"console", "otel"}
+  } else {
+    bcds = strings.Split(bcdS, ",")
+  }
   for _, v := range bcds {
     f := backend.Get(v)
     if f == nil {

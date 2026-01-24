@@ -1,6 +1,6 @@
 package emei
 
-import "github.com/yolksys/emei/env"
+import "github.com/yoophox/emei/env"
 
 // env
 type Env interface {

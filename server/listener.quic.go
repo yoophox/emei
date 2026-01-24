@@ -6,13 +6,13 @@ import (
 
   "github.com/quic-go/quic-go"
   "github.com/quic-go/quic-go/http3"
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/log"
-  "github.com/yolksys/emei/pki"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/log"
+  "github.com/yoophox/emei/pki"
 )
 
 // listenQuicSesn ...
-func listenQuicSesn(addr string) error {
+func listenQuic(addr string) error {
   tlsc, err := pki.NewServerTlsConfig()
   if err != nil {
     return err
@@ -64,10 +64,10 @@ func stream(c *quic.Conn) {
     switch c.ConnectionState().TLS.NegotiatedProtocol {
     case string(RPC_ALP_GOB):
       cc = newGobCodec(s)
-      go dispatchRpc(&linkTx{cc: cc, ReadWriteCloser: s, pol: nil})
+      go dispatchRpc(&linkTx{cc: cc, Conn: wrapQuicConn(s, c), pol: nil})
     case string(RPC_ALP_JSON):
       cc = newJsonCodec(s)
-      go dispatchRpc(&linkTx{cc: cc, ReadWriteCloser: s, pol: nil})
+      go dispatchRpc(&linkTx{cc: cc, Conn: wrapQuicConn(s, c), pol: nil})
     default:
       panic("not support alp:" + c.ConnectionState().TLS.NegotiatedProtocol)
     }

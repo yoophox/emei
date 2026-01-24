@@ -4,8 +4,8 @@ import (
   "os"
   "path"
 
-  "github.com/yolksys/emei/cla"
-  "github.com/yolksys/emei/utils"
+  "github.com/yoophox/emei/cla"
+  "github.com/yoophox/emei/utils"
 )
 
 // private

@@ -1,6 +1,6 @@
 package pki
 
-import "github.com/yolksys/emei/cla"
+import "github.com/yoophox/emei/cla"
 
 func init() {
   _pkiMtls = cla.Bool("pki-mtls", "mtls", false)

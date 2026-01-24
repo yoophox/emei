@@ -1,6 +1,6 @@
 package kube
 
-import "github.com/yolksys/emei/cfg"
+import "github.com/yoophox/emei/cfg"
 
 var (
   _etc      string

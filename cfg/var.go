@@ -1,8 +1,8 @@
 package cfg
 
 import (
-  "github.com/yolksys/emei/cfg/coder"
-  "github.com/yolksys/emei/cfg/source"
+  "github.com/yoophox/emei/cfg/coder"
+  "github.com/yoophox/emei/cfg/source"
 )
 
 const (

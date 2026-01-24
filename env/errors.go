@@ -1,6 +1,6 @@
 package env
 
-import "github.com/yolksys/emei/errs"
+import "github.com/yoophox/emei/errs"
 
 const (
   ERR_ID_DEFAULT     errs.ErrId = "err.default"

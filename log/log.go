@@ -4,7 +4,7 @@ import (
   "context"
   "sync"
 
-  "github.com/yolksys/emei/log/core"
+  "github.com/yoophox/emei/log/core"
 )
 
 type Logger = core.Log

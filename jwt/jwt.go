@@ -4,13 +4,13 @@ import (
   "fmt"
 
   "github.com/golang-jwt/jwt/v5"
-  "github.com/yolksys/emei/errs"
-  "github.com/yolksys/emei/pki"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/pki"
 )
 
 type JWT interface {
   GetClaim(key string) string
-  SetClaim(k, v string)
+  // SetClaim(k, v string)
   Exchange(opts ...Option) JWT
   IsLegal() bool
   ErrInfo() error
