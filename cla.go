@@ -3,7 +3,8 @@ package emei
 import "github.com/yoophox/emei/cla"
 
 var (
-  AssertCmd = cla.Assert
-  BoolCmd   = cla.Bool
-  StringCmd = cla.String
+  ClaAssert = cla.Assert
+  ClaBool   = cla.Bool
+  ClaString = cla.String
+  ClaInt64  = cla.Int64
 )

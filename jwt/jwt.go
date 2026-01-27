@@ -13,7 +13,7 @@ type JWT interface {
   // SetClaim(k, v string)
   Exchange(opts ...Option) JWT
   IsLegal() bool
-  ErrInfo() error
+  Err() error
   Sign() (string, error)
   Raw() string
 }
@@ -46,8 +46,8 @@ func New(o ...Option) JWT {
   return t
 }
 
-// Parse ...
-func Parse(jwtstr string) JWT {
+// FromStr ...
+func FromStr(jwtstr string) JWT {
   tok, err := jwt.Parse(jwtstr, func(t *jwt.Token) (any, error) {
     h := t.Header
     if h == nil {

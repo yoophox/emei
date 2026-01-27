@@ -8,12 +8,12 @@ import (
 )
 
 func init() {
-  _etc = cla.String("kube-etc", "etc cfg", "")
-  _localDir = cla.String("kube-local", "local cfg", "")
+  _etc = cla.Bool("kube.etc", "etc cfg", false)
+  _localDir = cla.String("kube.local", "local cfg", "")
   _localDir = strings.TrimSuffix(_localDir, "/")
 
   uri := ""
-  if _etc != "" {
+  if _etc {
     LookupServer = lookupServerInEtc
     LookupNet = lookupNetInEtc
     LookupIP = lookupIPInEtc

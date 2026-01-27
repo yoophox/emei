@@ -19,11 +19,19 @@ func NewClientTlsConfig() (*tls.Config, error) {
 
 // NewServerTlsConfig ...
 func NewServerTlsConfig() (*tls.Config, error) {
-  cert, key, _, err := KeyPairWithPin(4096)
-  if err != nil {
-    return nil, err
+  var c tls.Certificate
+  var err error
+
+  if _pkiLocalCertPath != "" && _pkiLocalKeyPath != "" {
+    c, err = tls.LoadX509KeyPair(_pkiLocalCertPath, _pkiLocalKeyPath)
+  } else {
+    cert, key, _, err := KeyPairWithPin(4096)
+    if err != nil {
+      return nil, err
+    }
+    c, err = tls.X509KeyPair(cert, key)
   }
-  c, err := tls.X509KeyPair(cert, key)
+
   if err != nil {
     return nil, err
   }
@@ -34,19 +42,24 @@ func NewServerTlsConfig() (*tls.Config, error) {
 }
 
 // GetPriKeyByID ...
-func GetPriKeyByID(id uint64) (any, error) {
-  return nil, nil
+func GetPriKeyByID(jwt string, id uint64) (any, error) {
+  return _backend.getPriKeyByID(jwt, id)
+}
+
+// Sign ...
+func Sign(id uint64, c []byte) ([]byte, error) {
+  return _backend.sign(id, c)
 }
 
 // GetPubKeyByID ...
 func GetPubKeyByID(id uint64) (any, error) {
-  return nil, nil
+  return _backend.getPubKeyByID(id)
 }
 
 // GetRandomCrpto ...
 // @return: crypto ID
 func GetRandomCrpto(opts ...Option) (uint64, error) {
-  return 0, nil
+  return _backend.getRandomCrypto(opts...)
 }
 
 // NewCertAndKey

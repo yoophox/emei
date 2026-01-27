@@ -11,6 +11,7 @@ import (
   "go.opentelemetry.io/otel/sdk/trace"
 
   "github.com/yoophox/emei/kube"
+  "github.com/yoophox/emei/names"
   "github.com/yoophox/emei/utils"
   "go.opentelemetry.io/otel/sdk/resource"
 )
@@ -40,7 +41,7 @@ func init() {
 
 // createExports ...
 func createExports() {
-  s, err := kube.LookupServer("@@opentelemetry")
+  s, err := kube.LookupServer(names.NAME_SERVICE_OTEL_COLLECTOR)
   if err != nil {
     panic(err)
   }

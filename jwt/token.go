@@ -40,7 +40,7 @@ func (k *token) IsLegal() bool {
   return k.Valid
 }
 
-func (k *token) ErrInfo() error {
+func (k *token) Err() error {
   return k.err
 }
 
@@ -60,16 +60,23 @@ func (k *token) Sign() (string, error) {
   }
 
   pid_ := pkiid.(uint64)
-  prikey, err := pki.GetPriKeyByID(pid_)
+  // prikey, err := pki.GetPriKeyByID("", pid_)
+  // if err != nil {
+  //   return "", errs.Wrap(err, ERR_ID_JWT_NO_PKI_ID)
+  // }
+  // s, err := k.SignedString(prikey)
+
+  sstr, err := k.SigningString()
   if err != nil {
-    return "", errs.Wrap(err, ERR_ID_JWT_NO_PKI_ID)
+    return "", err
   }
-  s, err := k.SignedString(prikey)
-  if err == nil {
-    k.Token.Raw = s
+  sig, err := pki.Sign(pid_, []byte(sstr))
+  if err != nil {
+    return "", err
   }
 
-  return s, err
+  k.Token.Raw = sstr + "." + k.EncodeSegment(sig)
+  return k.Token.Raw, nil
 }
 
 func (k *token) Raw() string {

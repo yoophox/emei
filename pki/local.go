@@ -10,9 +10,12 @@ package pki
 
 import (
   "bufio"
+  "crypto/ed25519"
+  "crypto/x509"
   "encoding/pem"
   "fmt"
   "io"
+  "math/rand"
   "os"
   "regexp"
   "strconv"
@@ -118,11 +121,39 @@ func newLocalBackend() *local {
 }
 
 func (l *local) getRandomCrypto(o ...Option) (uint64, error) {
-  if len(l.cryptos) <= 0 {
-    return 0, errs.Wrap(fmt.Errorf("have no keys in local data"), ERR_ID_PKI_LOCAL_NO_KEY)
+  var opt options
+
+  for _, v := range o {
+    v(&opt)
   }
 
-  return 0, nil
+  typ := opt.typ
+  typc, ok := l.crps[string(typ)]
+  if !ok || len(typc) <= 0 {
+    return 0, errs.Wrap(fmt.Errorf("have no keys for type:%s in local data", typ), ERR_ID_PKI_LOCAL_NO_KEY)
+  }
+
+  i := rand.Intn(len(typc))
+
+  return typc[i].CID, nil
 }
-func (l *local) getPriKeyByID(id uint64) (*pem.Block, error)
+func (l *local) getPriKeyByID(jwt string, id uint64) (*pem.Block, error)
+func (l *local) sign(id uint64, c []byte) ([]byte, error) {
+  cyt, ok := l.cryptos[id]
+  if !ok {
+    return nil, errs.Wrap(fmt.Errorf("have no key for id:%d", id), ERR_ID_PKI_LOCAL_NO_KEY)
+  }
+
+  k, err := x509.ParsePKCS8PrivateKey(cyt.Pri.Bytes)
+  if err != nil {
+    return nil, errs.Wrap(err, ERR_ID_PKI_LOCAL_PARSE_KEY)
+  }
+  switch cyt.Typ {
+  case "rsa":
+  case "ed25519":
+    ret := ed25519.Sign(k.([]byte), c)
+    return ret, nil
+  }
+  return nil, errs.Wrap(fmt.Errorf("unkown typ of key:%s", cyt.Typ), ERR_ID_PKI_LOCAL_TYP)
+}
 func (l *local) getPubKeyByID(id uint64) (*pem.Block, error)

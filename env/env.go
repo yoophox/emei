@@ -197,7 +197,7 @@ func (e *env) JWT(j ...any) jwt.JWT {
   if len(j) == 1 {
     switch j_ := j[0].(type) {
     case string:
-      e.jwt = jwt.Parse(j_)
+      e.jwt = jwt.FromStr(j_)
       e.tjax.Jwt = j_
     case jwt.JWT:
       e.jwt = j_
@@ -205,7 +205,7 @@ func (e *env) JWT(j ...any) jwt.JWT {
   }
 
   if e.jwt == nil {
-    e.jwt = jwt.Parse(e.tjax.Jwt)
+    e.jwt = jwt.FromStr(e.tjax.Jwt)
   }
 
   return e.jwt
@@ -240,7 +240,7 @@ func (e *env) WaitAny() {
 
 func (e *env) uid() string {
   if e.jwt == nil {
-    e.jwt = jwt.Parse(e.tjax.Jwt)
+    e.jwt = jwt.FromStr(e.tjax.Jwt)
   }
 
   return e.jwt.GetClaim(jwt.COMMON_USER_CLAIM_UID)
@@ -248,7 +248,7 @@ func (e *env) uid() string {
 
 func (e *env) uname() string {
   if e.jwt == nil {
-    e.jwt = jwt.Parse(e.tjax.Jwt)
+    e.jwt = jwt.FromStr(e.tjax.Jwt)
   }
 
   return e.jwt.GetClaim(jwt.COMMON_USER_CLAIM_UNAME)

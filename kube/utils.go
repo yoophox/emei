@@ -4,6 +4,7 @@ import (
   "fmt"
 
   "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/names"
 )
 
 // getSvcCfg ...
@@ -23,7 +24,7 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
     return _c, nil
   }
 
-  if svc == "@@self" {
+  if svc == names.NAME_SERVICE_SELF {
     return _selfSvcCfg, nil
   }
 
@@ -31,7 +32,7 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
   uri := ""
   switch uriType {
   case "local":
-    uri = fmt.Sprintf("%s~%s/%s", cfg.CFG_SOURCE_LOCAL,
+    uri = fmt.Sprintf("%s~%s", cfg.CFG_SOURCE_LOCAL,
       _localDir+"/"+dSvcName+".yaml")
   case "etc":
     uri = fmt.Sprintf("%s~service:cfg/%s~%s",
@@ -61,18 +62,24 @@ func lookupNetFromCfg(svcCfg cfg.Config) (*Net, error) {
   if err != nil {
     return nil, err
   }
-  var net string
-  err = svcCfg.Scan(CFG_RPC_NET_PATH, &net)
-  if err != nil {
-    return nil, err
-  }
-  return &Net{Port: port, Net: net}, nil
+  // var net string
+  // err = svcCfg.Scan(CFG_RPC_NET_PATH, &net)
+  // if err != nil {
+  //   return nil, err
+  // }
+  return &Net{Port: port}, nil
 }
 
 // getDeployedSeviceName ...
 func getDeployedSeviceName(svc string) string {
-  if svc == "@@self" {
+  if svc == names.NAME_SERVICE_SELF {
     return cfg.Service
+  }
+
+  var name string
+  err := _selfSvcCfg.Scan(CFG_ANNOTATIONS_PRE+svc, name)
+  if err == nil || name != "" {
+    return name
   }
 
   // get real service name from annotation of cfg

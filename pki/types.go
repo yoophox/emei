@@ -8,3 +8,5 @@ type cryptosx struct {
   CID uint64
   Typ string // rsa...
 }
+
+type cryptoClass string

@@ -115,19 +115,20 @@ func Assert() {
 
 // parseCmd ...
 func parseCmd() {
-  _reg := regexp.MustCompile(`^[a-zA-Z\.]+(=.+)?$`)
+  _reg := regexp.MustCompile(`^[a-zA-Z]+([\.\-][a-zA-A]+)*(=.+)?$`)
+  _sreg := regexp.MustCompile(`^[a-zA-Z]$`)
   for i := 1; i < len(os.Args); i++ {
     if len(os.Args[i]) > 2 && os.Args[i][:2] == "--" && _reg.MatchString(os.Args[i][2:]) {
       pos := strings.Index(os.Args[i][2:], "=")
       if pos > 0 {
-        _cmdDesc[os.Args[i][2:2+pos]] = &cdesc{name: os.Args[i][2:pos], value: os.Args[i][2+pos+1:]}
+        _cmdDesc[os.Args[i][2:2+pos]] = &cdesc{name: os.Args[i][2 : 2+pos], value: os.Args[i][2+pos+1:]}
       } else if i < len(os.Args)-1 && os.Args[i+1][0] != '-' {
         _cmdDesc[os.Args[i][2:]] = &cdesc{name: os.Args[i][2:], value: os.Args[i+1]}
         i++
       } else {
         _cmdDesc[os.Args[i][2:]] = &cdesc{name: os.Args[i][2:]}
       }
-    } else if len(os.Args[i]) == 2 && os.Args[i][0] == '-' && _reg.MatchString(os.Args[i][2:]) {
+    } else if len(os.Args[i]) == 2 && os.Args[i][0] == '-' && _sreg.MatchString(os.Args[i][1:]) {
       if i < len(os.Args)-1 && os.Args[i+1][0] != '-' {
         _cmdDesc[os.Args[i][1:]] = &cdesc{value: os.Args[i+1]}
         i++
