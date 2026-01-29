@@ -36,7 +36,7 @@ func WithClaims(kv ...string) Option {
     if o.Clms == nil {
       o.Clms = map[string]string{}
     }
-    for i := range l {
+    for i := 0; i < l; {
       o.Clms[kv[i]] = kv[i+1]
       i += 2
     }

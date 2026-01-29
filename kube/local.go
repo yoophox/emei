@@ -36,14 +36,20 @@ func lookupNetInLocal(svc string) (*Net, error) {
 
   return lookupNetFromCfg(svcCfg)
 }
-func lookupIPInLocal(svc string) (string, error)
-func lookupEPTsInLocal(svc string) (ips []string, err error) // get all ips of a service
+
+func lookupIPInLocal(svc string) (string, error) {
+  return "", nil
+}
+
+func lookupEPTsInLocal(svc string) (ips []string, err error) {
+  return nil, nil
+}
 
 var _hosts cfg.Config
 
 // initHost ...
 func initHost() {
-  uri := cfg.BuildCfgURI(cfg.CFG_SOURCE_LOCAL, _localDir+"/host.json")
+  uri := cfg.BuildCfgURI(cfg.CFG_SOURCE_LOCAL, *_localDir+"/host.json")
   var err error
   _hosts, err = cfg.New(uri)
   if err != nil {

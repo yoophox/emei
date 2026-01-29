@@ -11,6 +11,16 @@ var (
   ServeFor = svr.ServeFor
 )
 
+const (
+  SVR_FOR_WEB = svr.SERVER_FOR_WEB
+  SVR_FOR_RPC = svr.SERVER_FOR_RPC
+)
+
+type (
+  WebResponse = svr.WebResponse
+  WebSock     = svr.WebSock
+)
+
 // call ...
 func Call(e env.Env, svc, met string, args ...any) error {
   return svr.Call(e, svc, met, args...)

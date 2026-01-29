@@ -20,14 +20,14 @@ func newSpanCtxFromTraceData(d TracedData) context.Context {
 }
 
 // spanEnder ...
-func spanEnder() {
-  for {
-    select {
-    case s := <-_spanEndChan:
-      s.End()
-    }
-  }
-}
+// func spanEnder() {
+//   for {
+//     select {
+//     case s := <-_spanEndChan:
+//       s.End()
+//     }
+//   }
+// }
 
 // --------------------------------------------------------
 // for span

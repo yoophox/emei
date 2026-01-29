@@ -44,11 +44,6 @@ func schedule() {
 
 // skip-list
 
-func init() {
-  _baseTime = time.Now()
-  schedule()
-}
-
 type skiplistElem struct {
   j *job
   t time.Duration // sub(basetime)

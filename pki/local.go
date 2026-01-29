@@ -37,11 +37,8 @@ func newLocalBackend() *local {
     panic(err)
   }
   defer f.Close()
-  regS := regexp.MustCompile(`@key.*\{type:.*\}\.\{cid:\.*\}\.\{pri-len:.*\}\.\{pub-len:.*\}`)
-  fkt := regexp.MustCompile(`\{type:.*\}`)
-  fkid := regexp.MustCompile(`\{cid:.*\}`)
-  fki := regexp.MustCompile(`\{pri-len:.*\}`)
-  fku := regexp.MustCompile(`\{\pub-len:.*\}`)
+  regS := regexp.MustCompile(`@key.*\{type:([0-9a-zA-Z]+)\}\.\{cid:([0-9]+)\}\.\{pri-len:([0-9]+)\}\.\{pub-len:([0-9]+)\}`)
+  // regS := regexp.MustCompile(`^@key.*type:[a-z]+`)
 
   fsc := bufio.NewReader(f)
   var c *cryptosx
@@ -60,57 +57,58 @@ func newLocalBackend() *local {
       continue
     }
 
-    if !regS.Match([]byte(line)) {
-      panic("asfadadfas")
+    values := regS.FindAllStringSubmatch(string(line), -1)
+    if values == nil {
+      panic(string(line))
     }
-    ct_ := fkt.Find([]byte(line))
-    cid := fkid.Find([]byte(line))
-    ci_ := fki.Find([]byte(line))
-    cu_ := fku.Find([]byte(line))
+    ct_ := values[0][1]
+    cid := values[0][2]
+    ci_ := values[0][3]
+    cu_ := values[0][4]
     if string(ct_) == "" || string(ci_) == "" || string(cu_) == "" {
       panic("format error")
     }
 
     c = &cryptosx{}
-    c.Typ = string(ct_[6 : len(ct_)-1])
-    cid_, err := strconv.ParseUint(string(cid[5:len(cid)-1]), 10, 64)
+    c.Typ = string(ct_)
+    cid_, err := strconv.ParseInt(string(cid), 10, 64)
     if err != nil {
-      panic("parse cid")
+      panic("parse cid" + string(cid))
     }
-    c.CID = cid_
-    pril, err = strconv.Atoi(string(ci_[9 : len(ci_)-1]))
+    c.CID = uint64(cid_)
+    pril, err = strconv.Atoi(ci_)
     if err != nil {
       panic("parse pril")
     }
-    publ, err = strconv.Atoi(string(cu_[9 : len(ci_)-1]))
+    publ, err = strconv.Atoi(cu_)
     if err != nil {
       panic("parse publ")
     }
     ksc := make([]byte, pril+1+publ+1)
-    n, err := fsc.Read(ksc)
+    n, err := io.ReadFull(fsc, ksc)
     if n != (pril + 1 + publ + 1) {
-      panic(n)
-    }
-    if err != nil {
+      fmt.Println("************", n, pril, publ, len(ksc))
       panic(err)
     }
     // var prib, pubb pem.Block
-    prib, rest := pem.Decode(ksc[:pril])
-    if rest != nil || len(rest) != 0 {
-      panic(rest)
+    prib, _ := pem.Decode(ksc[:pril])
+    pri, err := x509.ParsePKCS8PrivateKey(prib.Bytes)
+    if err != nil {
+      panic(err)
     }
-    pubb, rest := pem.Decode(ksc[pril+1 : len(ksc)-1])
-    if rest != nil || len(rest) != 0 {
-      panic(rest)
+    pubb, _ := pem.Decode(ksc[pril+1 : len(ksc)-1])
+    pub, err := x509.ParsePKIXPublicKey(pubb.Bytes)
+    if err != nil {
+      panic(err)
     }
-    c.Pri = prib
-    c.Pub = pubb
+    c.Pri = pri
+    c.Pub = pub
     _, ok := l.crps[c.Typ]
     if !ok {
       l.crps[c.Typ] = []*cryptosx{}
     }
     l.crps[c.Typ] = append(l.crps[c.Typ], c)
-    l.cryptos[cid_] = c
+    l.cryptos[uint64(cid_)] = c
 
     c = nil
     pril = 0 //
@@ -137,23 +135,26 @@ func (l *local) getRandomCrypto(o ...Option) (uint64, error) {
 
   return typc[i].CID, nil
 }
-func (l *local) getPriKeyByID(jwt string, id uint64) (*pem.Block, error)
+
+func (l *local) getPriKeyByID(jwt string, id uint64) (*pem.Block, error) {
+  return nil, nil
+}
+
 func (l *local) sign(id uint64, c []byte) ([]byte, error) {
   cyt, ok := l.cryptos[id]
   if !ok {
     return nil, errs.Wrap(fmt.Errorf("have no key for id:%d", id), ERR_ID_PKI_LOCAL_NO_KEY)
   }
 
-  k, err := x509.ParsePKCS8PrivateKey(cyt.Pri.Bytes)
-  if err != nil {
-    return nil, errs.Wrap(err, ERR_ID_PKI_LOCAL_PARSE_KEY)
-  }
   switch cyt.Typ {
   case "rsa":
   case "ed25519":
-    ret := ed25519.Sign(k.([]byte), c)
+    ret := ed25519.Sign(cyt.Pri.(ed25519.PrivateKey), c)
     return ret, nil
   }
   return nil, errs.Wrap(fmt.Errorf("unkown typ of key:%s", cyt.Typ), ERR_ID_PKI_LOCAL_TYP)
 }
-func (l *local) getPubKeyByID(id uint64) (*pem.Block, error)
+
+func (l *local) getPubKeyByID(id uint64) (*pem.Block, error) {
+  return nil, nil
+}

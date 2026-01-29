@@ -1,5 +1,7 @@
 package emei
 
+import "github.com/yoophox/emei/flag"
+
 // caller
 
 // cmd
@@ -9,3 +11,5 @@ package emei
 // log
 
 // websock
+
+var Usage = flag.Usage

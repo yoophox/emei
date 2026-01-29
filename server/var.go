@@ -51,7 +51,7 @@ var (
   typeOfEnv          = reflect.TypeFor[env.Env]()
 )
 
-var _rootEnv = env.New(nil)
+var _rootEnv env.Env //= env.New(nil)
 
 const (
   _RPC_TIMEOUT = 5 // second

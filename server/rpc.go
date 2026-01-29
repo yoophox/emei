@@ -79,7 +79,7 @@ func assist(e env.Env, l *linkTx, topic string) {
 
     l.SetDeadline(time.Time{})
   }()
-  defer e.Trace()
+  defer e.Trace(topic)
 
   pos := strings.Index(topic, ".")
   e.AssertBool(pos > 0, ERR_ID_RPC_CALLINFO_LEN, topic)

@@ -11,7 +11,7 @@ import (
 
 // talk ...
 func talk(e env.Env, peer string, topic string, content ...any) resIx {
-  defer e.Trace()
+  defer e.Trace(topic)
   l, err := getLink(peer)
   if err != nil {
     return &defaultResIx{err: err}

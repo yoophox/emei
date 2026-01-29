@@ -383,7 +383,7 @@ func (Encoder) AppendFloats64(dst []byte, vals []float64, precision int) []byte 
 
 // AppendInterface marshals the input interface to a string and
 // appends the encoded string to the input byte slice.
-func (e Encoder) AppendInterface(dst []byte, i interface{}) []byte {
+func (e Encoder) AppendInterface(dst []byte, i any) []byte {
   marshaled, err := JSONMarshalFunc(i)
   if err != nil {
     return e.AppendString(dst, fmt.Sprintf("marshaling error: %v", err))
@@ -392,7 +392,7 @@ func (e Encoder) AppendInterface(dst []byte, i interface{}) []byte {
 }
 
 // AppendType appends the parameter type (as a string) to the input byte slice.
-func (e Encoder) AppendType(dst []byte, i interface{}) []byte {
+func (e Encoder) AppendType(dst []byte, i any) []byte {
   if i == nil {
     return e.AppendString(dst, "<nil>")
   }

@@ -4,10 +4,12 @@ import (
   "context"
   "crypto/tls"
   "net"
+  "net/http"
 
   "github.com/yoophox/emei/errs"
   "github.com/yoophox/emei/log"
   "github.com/yoophox/emei/pki"
+  "golang.org/x/net/http2"
 )
 
 // Listen ...
@@ -41,6 +43,7 @@ func acceptTcp(l net.Listener) {
     var cc codecIx
 
     if err := tlsc.HandshakeContext(context.Background()); err != nil {
+      // panic("tcp handshakecontext err: " + err.Error())
     }
 
     switch tlsc.ConnectionState().NegotiatedProtocol {
@@ -50,8 +53,20 @@ func acceptTcp(l net.Listener) {
     case string(RPC_ALP_JSON):
       cc = newJsonCodec(c)
       go dispatchRpc(&linkTx{cc: cc, Conn: c, pol: nil})
+    case string(RPC_ALP_HTTP2):
+      serveh(c)
     default:
-      panic("not support alp:" + tlsc.ConnectionState().NegotiatedProtocol)
+      log.Event("not support alp", tlsc.ConnectionState().NegotiatedProtocol)
     }
   }
+}
+
+// serveHttp ...
+func serveh(c net.Conn) {
+  opt := http2.ServeConnOpts{
+    Context: context.Background(),
+    Handler: http.HandlerFunc(serveHttp),
+  }
+  s := http2.Server{}
+  s.ServeConn(c, &opt)
 }

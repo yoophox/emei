@@ -62,6 +62,7 @@ func wait() {
 // sigHandler ...
 func sigHandler() {
   <-_sigCh
+  _rootEnv.Cancel()
   //_rootEnv
 }
 

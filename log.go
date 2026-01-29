@@ -6,3 +6,5 @@ var (
   Log    = log.Log
   NewLog = log.New
 )
+
+// InitLog(opts ...Option)

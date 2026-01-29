@@ -11,7 +11,7 @@ import (
 
 // serveHttp ...
 func serveHttp(w http.ResponseWriter, r *http.Request) {
-  topic := r.URL.Path
+  topic := strings.TrimPrefix(r.URL.Path, "/")
   pos := strings.Index(topic, ".")
   if pos <= 0 {
     w.Write([]byte("path have no dot:" + topic))
@@ -54,9 +54,9 @@ func serveHttp(w http.ResponseWriter, r *http.Request) {
     }
     w.WriteHeader(http.StatusOK)
   }()
-  e.Trace()
+  defer e.Trace(topic)
 
-  rcvr, ok := _rpcRecvs[topic[:pos]]
+  rcvr, ok := _webRecvs[topic[:pos]]
   e.AssertBool(ok, ERR_ID_RPC_CALLINFO_RCVR, "no rcvr for topic: %s", topic)
   m, ok := rcvr.funcs[topic[pos+1:]]
   e.AssertBool(ok, ERR_ID_RPC_CALLINFO_RCVR, "no rcvr for func: %s", topic)

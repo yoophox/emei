@@ -33,7 +33,7 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
   switch uriType {
   case "local":
     uri = fmt.Sprintf("%s~%s", cfg.CFG_SOURCE_LOCAL,
-      _localDir+"/"+dSvcName+".yaml")
+      *_localDir+"/"+dSvcName+".yaml")
   case "etc":
     uri = fmt.Sprintf("%s~service:cfg/%s~%s",
       cfg.CFG_SOURCE_ETC,
@@ -77,10 +77,11 @@ func getDeployedSeviceName(svc string) string {
   }
 
   var name string
-  err := _selfSvcCfg.Scan(CFG_ANNOTATIONS_PRE+svc, name)
+  err := _selfSvcCfg.Scan(CFG_ANNOTATIONS_PRE+svc, &name)
   if err == nil || name != "" {
     return name
   }
+  // fmt.Println("file:kube.utils,", "err", err)
 
   // get real service name from annotation of cfg
   return svc[2:]

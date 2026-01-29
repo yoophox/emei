@@ -42,7 +42,7 @@ func (l *linkTx) Values(typs ...reflect.Type) ([]reflect.Value, error) {
     }
     ret = append(ret, vv)
   }
-  return nil, nil
+  return ret, nil
 }
 
 func (l *linkTx) Release() {

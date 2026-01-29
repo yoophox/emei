@@ -13,7 +13,7 @@ func VerifyPeerCertificate(rawCerts [][]byte, verifiedChains [][]*x509.Certifica
 func NewClientTlsConfig() (*tls.Config, error) {
   return &tls.Config{
     VerifyPeerCertificate: VerifyPeerCertificate,
-    // InsecureSkipVerify: true,
+    InsecureSkipVerify:    true,
   }, nil
 }
 

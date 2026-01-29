@@ -5,13 +5,20 @@ import (
 
   "github.com/yoophox/emei/cfg"
   "github.com/yoophox/emei/cfg/source/cetc"
-  "github.com/yoophox/emei/cla"
   "github.com/yoophox/emei/etc/dns"
   "github.com/yoophox/emei/etc/etcintra"
+  "github.com/yoophox/emei/flag"
 )
 
 func init() {
-  e := cla.String("etc", "", "") // fmt: "backend;addr,addr,addr;export[;prefix]"
+  fs_ := flag.NewFlagSet("etc")
+  e_ := fs_.String("etc", "", "etc cfg")
+  err := fs_.Parse()
+  if err == flag.ErrHelp {
+    return
+  }
+
+  e := *e_ // fmt: "backend;addr,addr,addr;export[;prefix]"
   if e == "" {
     return
   }

@@ -99,7 +99,7 @@ func parseRpc(rc_ any) error {
     panic("have no exported method")
   }
 
-  log.Debug("*****", _rcvr)
+  log.Debug("rcvr", _rcvr)
   _rpcRecvs[strings.ToLower(tname)] = &_rcvr
 
   return nil

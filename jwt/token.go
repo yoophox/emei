@@ -55,7 +55,7 @@ func (k *token) Sign() (string, error) {
   }
 
   pkiid, ok := h[COMMON_HEADER_PKI_ID]
-  if ok {
+  if !ok {
     return "", errs.Wrap(fmt.Errorf("have no pki id in header"), ERR_ID_JWT_NO_PKI_ID)
   }
 

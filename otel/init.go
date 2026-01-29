@@ -10,6 +10,7 @@ import (
   "go.opentelemetry.io/otel/sdk/metric"
   "go.opentelemetry.io/otel/sdk/trace"
 
+  "github.com/yoophox/emei/flag"
   "github.com/yoophox/emei/kube"
   "github.com/yoophox/emei/names"
   "github.com/yoophox/emei/utils"
@@ -17,8 +18,11 @@ import (
 )
 
 func init() {
-  var err error
+  if flag.IsHelper() {
+    return
+  }
 
+  var err error
   _resource, err = resource.New(context.Background(), resource.WithContainerID(), resource.WithHostID())
   if err != nil {
     panic(err)

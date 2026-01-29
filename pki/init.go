@@ -1,16 +1,26 @@
 package pki
 
-import "github.com/yoophox/emei/cla"
+import "github.com/yoophox/emei/flag"
 
 func init() {
 }
 
 func init() {
-  _pkiMtls = cla.Bool("pki.mtls", "mtls", false)
+  fs_ := flag.NewFlagSet("pki")
+  pmtlsP := fs_.Bool("pki.mtls", false, "if use mtls")
+  pLocalP := fs_.String("pki.local", "", "pki local data path")
+  pLCertPathP := fs_.String("pki.local.cert", "", "local cert path")
+  pLKeyPathP := fs_.String("pki.local.key", "", "local key path")
+  err := fs_.Parse()
+  if err == flag.ErrHelp {
+    return
+  }
+
   //_pkiService = cla.String("pki.service", "pki service name", "")
-  _pkiLocal = cla.String("pki.local", "pki local data path", "")
-  _pkiLocalCertPath = cla.String("pki.local.cert", "local cert path for server", "")
-  _pkiLocalKeyPath = cla.String("pki.local.key", "local private key path for server", "")
+  _pkiMtls = *pmtlsP
+  _pkiLocal = *pLocalP
+  _pkiLocalCertPath = *pLCertPathP
+  _pkiLocalKeyPath = *pLKeyPathP
 
   if _pkiLocal != "" {
     _backend = newLocalBackend()

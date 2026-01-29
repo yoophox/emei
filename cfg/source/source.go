@@ -1,7 +1,6 @@
 package source
 
 import (
-  "errors"
   "fmt"
 
   "github.com/yoophox/emei/cfg/source/cetc"
@@ -13,7 +12,7 @@ import (
 func Load(sTyp, url string) (inter.Source, error) {
   ld_, ok := _loaders[sTyp]
   if !ok {
-    return nil, errors.New(fmt.Sprintf("fail:source->load, msg: have no loader for '%s'", sTyp))
+    return nil, fmt.Errorf("fail:source->load, msg: have no loader for '%s'", sTyp)
   }
   return ld_(url)
 }

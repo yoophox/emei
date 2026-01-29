@@ -1,10 +1,8 @@
 package pki
 
-import "encoding/pem"
-
 type cryptosx struct {
-  Pri *pem.Block
-  Pub *pem.Block
+  Pri any
+  Pub any
   CID uint64
   Typ string // rsa...
 }

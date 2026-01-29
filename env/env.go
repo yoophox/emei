@@ -37,7 +37,7 @@ type env struct {
 func new(tja *Tjatse) *env {
   e := pool.Get().(*env)
   e.Logger = log.New(context.Background(), core.WithCacheMode())
-  e.Logger.CallerSkip(envLogSkip)
+  // e.Logger.CallerSkip(envLogSkip)
   e.Logger.Event("*", "start")
   e.wgx.Add(1)
 
@@ -95,10 +95,13 @@ func (e *env) Finish() {
   e.Logger.CallerSkip(envLogSkip)
 }
 
-func (e *env) Trace() {
+func (e *env) Trace(name string) {
+  defer e.Logger.CallerSkip(0)
+
   r := recover()
   if r == nil {
-    e.Logger.Event("*", "returned")
+    e.Logger.CallerSkip(envLogSkip)
+    e.Logger.Event("traced:"+name, "returned")
     return
   }
 
@@ -108,8 +111,10 @@ func (e *env) Trace() {
 
   fal := utils.GetCallerFrame(panicFrameSkip + 1)
   e.Logger.CallerSkip(-1)
-  defer e.Logger.CallerSkip(envLogSkip)
-  e.Logger.Fatal("S-F", path.Base(fal.Function),
+  // defer e.Logger.CallerSkip(envLogSkip)
+  e.Logger.Fatal(
+    "S-T", name,
+    "S-F", path.Base(fal.Function),
     "S-pos", fmt.Sprintf("%s:%d", path.Base(fal.File), fal.Line),
     "panic", fmt.Sprintf("%+v", r))
 }
@@ -236,6 +241,10 @@ func (e *env) Wait() {
 }
 
 func (e *env) WaitAny() {
+}
+
+func (e *env) Cancel() {
+  e.wgx.Add(-1)
 }
 
 func (e *env) uid() string {

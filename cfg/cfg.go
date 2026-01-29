@@ -67,9 +67,9 @@ func BuildCfgURI(source, path string, coder ...string) string {
 func getCoderType(p string) string {
   ext := path.Ext(p)
   switch ext {
-  case "json":
+  case ".json":
     return CFG_CODER_JSON
-  case "yaml":
+  case ".yaml":
     return CFG_CODER_YAML
   default:
     return ""

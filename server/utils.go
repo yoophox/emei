@@ -20,7 +20,7 @@ func decodeType(typ reflect.Type, cc codecIx) (reflect.Value, error) {
     vv = reflect.New(typ)
   }
 
-  err := cc.Decode(vv)
+  err := cc.Decode(vv.Interface())
   if err != nil {
     return vv, err
   }

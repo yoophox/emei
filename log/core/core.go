@@ -5,7 +5,7 @@ import (
   "strings"
   "sync"
 
-  "github.com/yoophox/emei/cla"
+  "github.com/yoophox/emei/flag"
   "github.com/yoophox/emei/log/backend"
   "github.com/yoophox/emei/log/cache"
 )
@@ -39,17 +39,17 @@ const (
 )
 
 type Log interface {
-  Debug(...interface{}) Log
-  Info(...interface{}) Log
-  Warn(...interface{}) Log
-  Event(...interface{}) Log
-  Error(...interface{}) Log
-  Fatal(...interface{}) Log
-  Log(...interface{}) Log
+  Debug(...any) Log
+  Info(...any) Log
+  Warn(...any) Log
+  Event(...any) Log
+  Error(...any) Log
+  Fatal(...any) Log
+  Log(...any) Log
   Flush() Log
 
   Level(Level) Log
-  Prefix(...interface{}) Log
+  Prefix(...any) Log
   CallerSkip(int) Log    // if < 0 disable caller field
   TimeFmt(string) Log    // = "" disable time field
   TFieldName(string) Log // time name
@@ -58,7 +58,7 @@ type Log interface {
   // ConfigCacheMode(c bool) Log
   SetTraceId(id string) Log
   AddAttri(key, value string) Log
-  // Suffix(...interface{}) Log
+  // Suffix(...any) Log
 }
 
 func New(ctx context.Context, opts ...optfunc) Log {
@@ -103,7 +103,7 @@ type logger struct {
   option
 }
 
-func (l *logger) Debug(m ...interface{}) Log {
+func (l *logger) Debug(m ...any) Log {
   if l.level > DebugLevel {
     return l
   }
@@ -111,7 +111,7 @@ func (l *logger) Debug(m ...interface{}) Log {
   return l.doLog("debug", m...)
 }
 
-func (l *logger) Info(m ...interface{}) Log {
+func (l *logger) Info(m ...any) Log {
   if l.level > InfoLevel {
     return l
   }
@@ -119,7 +119,7 @@ func (l *logger) Info(m ...interface{}) Log {
   return l.doLog("info", m...)
 }
 
-func (l *logger) Warn(m ...interface{}) Log {
+func (l *logger) Warn(m ...any) Log {
   if l.level > WarnLevel {
     return l
   }
@@ -127,7 +127,7 @@ func (l *logger) Warn(m ...interface{}) Log {
   return l.doLog("warn", m...)
 }
 
-func (l *logger) Event(m ...interface{}) Log {
+func (l *logger) Event(m ...any) Log {
   if l.level > EventLevel {
     return l
   }
@@ -135,7 +135,7 @@ func (l *logger) Event(m ...interface{}) Log {
   return l.doLog("event", m...)
 }
 
-func (l *logger) Error(m ...interface{}) Log {
+func (l *logger) Error(m ...any) Log {
   if l.level > ErrorLevel {
     return l
   }
@@ -143,7 +143,7 @@ func (l *logger) Error(m ...interface{}) Log {
   return l.doLog("error", m...)
 }
 
-func (l *logger) Fatal(m ...interface{}) Log {
+func (l *logger) Fatal(m ...any) Log {
   if l.level > FatalLevel {
     return l
   }
@@ -151,7 +151,7 @@ func (l *logger) Fatal(m ...interface{}) Log {
   return l.doLog("fatal", m...)
 }
 
-func (l *logger) Log(m ...interface{}) Log {
+func (l *logger) Log(m ...any) Log {
   caller(l)
   timeField(l)
   l.buf = serialize(l.buf, m...)
@@ -168,7 +168,7 @@ func (l *logger) Flush() Log {
   return l
 }
 
-func (l *logger) Prefix(m ...interface{}) Log {
+func (l *logger) Prefix(m ...any) Log {
   l.buf = serialize(l.buf, m...)
   return l
 }
@@ -254,10 +254,18 @@ var (
 
 func init() {
   // new backends due to cfg
+  fs_ := flag.NewFlagSet("logger")
+  lp_ := fs_.Int("log.level", int(DebugLevel), "log level")
+  bcdP := fs_.String("log.bcds", "", "log backens seperated by ,")
+  err := fs_.Parse()
+  if err == flag.ErrHelp {
+    return
+  }
+
   var bcds []string
-  level = Level(cla.Int64("log.level", "log level", int64(DebugLevel)))
+  level = Level(*lp_)
   // format: "b,b,b"
-  bcdS := cla.String("log.bcds", "log backens", "")
+  bcdS := *bcdP
   if bcdS == "" {
     bcds = []string{"console", "otel"}
   } else {

@@ -41,10 +41,8 @@ var (
   _allMetersCnt = map[string]int64{}
 )
 
-var (
-  _spanEndChan = make(chan trace.Span, 1)
-  _scope       = "gighub.com/emei/"
-)
+//_spanEndChan = make(chan trace.Span, 1)
+var _scope = "gighub.com/emei/"
 
 var (
   LogStringValue    = log.StringValue

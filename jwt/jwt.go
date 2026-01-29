@@ -48,7 +48,8 @@ func New(o ...Option) JWT {
 
 // FromStr ...
 func FromStr(jwtstr string) JWT {
-  tok, err := jwt.Parse(jwtstr, func(t *jwt.Token) (any, error) {
+  clms := &claims{}
+  tok, err := jwt.ParseWithClaims(jwtstr, clms, func(t *jwt.Token) (any, error) {
     h := t.Header
     if h == nil {
       return nil, errs.Wrap(fmt.Errorf("tok have no header"), ERR_ID_JWT_NO_HEADER)

@@ -56,7 +56,7 @@ func stream(c *quic.Conn) {
   for {
     s, err := c.AcceptStream(context.TODO())
     if err != nil {
-      log.Error("quic conn err", err.Error())
+      log.Error("accept stream", err.Error())
       return
     }
 
