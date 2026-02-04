@@ -34,8 +34,9 @@ const (
 )
 
 var (
-  _rpcRecvs = map[string]*rcvrTx{}
-  _webRecvs = map[string]*rcvrTx{}
+  _rpcRecvs   = map[string]*rcvrTx{}
+  _webRecvs   = map[string]*rcvrTx{}
+  _webCorsOri = []string{"*"}
   //_wg       *sync.WaitGroup
 )
 

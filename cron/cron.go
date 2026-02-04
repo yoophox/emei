@@ -1,7 +1,11 @@
 package cron
 
+import "time"
+
 type Cron interface {
-  Add(spec string, f CronFunc, p ...any) (Canceler, error)
+  Add(spec string, f any, p ...any) (Canceler, error)
+  At(t time.Time, f any, param ...any) (Canceler, error)
+  After(seconds int, f any, param ...any) (Canceler, error)
 }
 
 type Canceler func()

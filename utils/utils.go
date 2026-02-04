@@ -91,6 +91,18 @@ func IpType(ip string) string {
   return "ip4"
 }
 
+// CompriseAddr ...
+func CompriseAddr[T string | int](ip string, port T) string {
+  switch IpType(ip) {
+  case "ip4":
+    return fmt.Sprintf("%s:%v", ip, port)
+  case "ip6":
+    return fmt.Sprintf("[%s]:%v", ip, port)
+  }
+
+  return ""
+}
+
 // ...
 func HostId() string {
   switch runtime.GOOS {

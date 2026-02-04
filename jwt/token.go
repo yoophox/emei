@@ -48,15 +48,19 @@ func (k *token) Exchange(o ...Option) JWT {
   return nil
 }
 
-func (k *token) Sign() (string, error) {
+func (k *token) sign() {
+  if k.Token.Raw != "" {
+    return
+  }
+
   h := k.Header
   if h == nil {
-    return "", errs.Wrap(fmt.Errorf("tok have no header"), ERR_ID_JWT_NO_HEADER)
+    k.err = errs.Wrap(fmt.Errorf("tok have no header"), ERR_ID_JWT_NO_HEADER)
   }
 
   pkiid, ok := h[COMMON_HEADER_PKI_ID]
   if !ok {
-    return "", errs.Wrap(fmt.Errorf("have no pki id in header"), ERR_ID_JWT_NO_PKI_ID)
+    k.err = errs.Wrap(fmt.Errorf("have no pki id in header"), ERR_ID_JWT_NO_PKI_ID)
   }
 
   pid_ := pkiid.(uint64)
@@ -68,17 +72,27 @@ func (k *token) Sign() (string, error) {
 
   sstr, err := k.SigningString()
   if err != nil {
-    return "", err
+    k.err = err
+    return
   }
   sig, err := pki.Sign(pid_, []byte(sstr))
   if err != nil {
-    return "", err
+    k.err = err
+    return
   }
 
+  k.Valid = true
   k.Token.Raw = sstr + "." + k.EncodeSegment(sig)
-  return k.Token.Raw, nil
 }
 
 func (k *token) Raw() string {
   return k.Token.Raw
+}
+
+func (k *token) UID() string {
+  return k.GetClaim("uid")
+}
+
+func (k *token) UNmae() string {
+  return k.GetClaim("uname")
 }

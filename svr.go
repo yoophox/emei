@@ -7,7 +7,9 @@ import (
 
 // server
 var (
-  Serve    = svr.Serve
+  // func Serve()
+  Serve = svr.Serve
+  // func ServeFor(fo SvrFor, rcvr ...any)
   ServeFor = svr.ServeFor
 )
 
@@ -17,8 +19,39 @@ const (
 )
 
 type (
-  WebResponse = svr.WebResponse
-  WebSock     = svr.WebSock
+  WebResponse = svr.WebResponse // interface
+  WebSock     = svr.WebSock     // interface
+)
+
+var (
+  // func NewCookie(opts ...optionCok) *http.Cookie
+  NewCookie = svr.NewCookie
+  // func WithoutHttpOnlyCookie() optionCok
+  WithoutHttpOnlyCookie = svr.WithoutHttpOnlyCookie
+  // func WithoutSecureCookie() optionCok
+  WithoutSecureCookie = svr.WithoutSecureCookie
+  // func WithQuotedCookie() optionCok
+  WithQuotedCookie = svr.WithQuotedCookie
+  // func WithJwtCookie(j string) optionCok
+  WithJwtCookie = svr.WithJwtCookie
+  // func WithDelJwtCookie() optionCok
+  WithDelJwtCookie = svr.WithDelJwtCookie
+  // func WithTIDCookie(v string) optionCok
+  WithTIDCookie = svr.WithTIDCookie
+  // func WithDelTIDCookie() optionCok
+  WithDelTIDCookie = svr.WithDelTIDCookie
+  // func WithKVCookie(k, v string) optionCok
+  WithKVCookie = svr.WithKVCookie
+  // func WithDelCookie(k string) optionCok {
+  WithDelCookie = svr.WithDelCookie
+  // func WithMaxAgeCookie(s int) optionCok
+  WithMaxAgeCookie = svr.WithMaxAgeCookie
+  // func WithAllSiteCookie() optionCok
+  WithAllSiteCookie = svr.WithAllSiteCookie
+  // func AddJwtCookie(res WebResponse, j string)
+  AddJwtCookie = svr.AddJwtCookie
+  // func DelJwtCookie(res WebResponse)
+  DelJwtCookie = svr.DelJwtCookie
 )
 
 // call ...

@@ -7,14 +7,18 @@ import (
 )
 
 type Server struct {
-  IP   string
-  Net  string
-  Port string
+  IP string
+  *Net
 }
 
 type Net struct {
-  Port string
-  Net  string
+  Ports map[string]*ServicePort
+
+  ports []*ServicePort
+}
+
+type ServicePort struct {
+  Name, Port, TargetPort, NodePort string
 }
 
 type svcCache struct {

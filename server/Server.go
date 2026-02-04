@@ -35,9 +35,9 @@ func ServeFor(fo SvrFor, rcvr ...any) {
 func Serve() {
   netx, err := kube.LookupNet(names.NAME_SERVICE_SELF)
   utils.AssertErr(err)
-  err = listenQuic(":" + netx.Port)
+  err = listenQuic(":" + netx.Ports["quic"].TargetPort)
   utils.AssertErr(err)
-  err = listenTcp(":" + netx.Port)
+  err = listenTcp(":" + netx.Ports["tcp"].TargetPort)
   utils.AssertErr(err)
   wait()
 }

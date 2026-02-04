@@ -164,14 +164,13 @@ func (e *env) AssertErr(err error, errid ...errs.ErrId) {
   panic(err)
 }
 
-func (e *env) AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any) {
+func (e *env) AssertBool(ok bool, eid errs.ErrId, args ...any) {
   if ok {
     return
   }
 
-  err := fmt.Errorf(fmt_, args...)
-  e.Logger.Error("msg", err)
-  e.err = errs.Wrap(err, eid)
+  e.err = errs.ErrorF(eid, args...)
+  e.Logger.Error("msg", e.err)
   panic("")
 }
 

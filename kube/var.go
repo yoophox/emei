@@ -11,7 +11,7 @@ var (
 )
 
 const (
-  CFG_RPC_PORT_PATH   = "metadata.labels.server-port"
-  CFG_RPC_NET_PATH    = "metadata.labels.rpc-net"
-  CFG_ANNOTATIONS_PRE = "metadata.annotations."
+  CFG_SERVICE_PORTS_PATH = "spec.ports"
+  CFG_RPC_NET_PATH       = "metadata.labels.rpc-net"
+  CFG_ANNOTATIONS_PRE    = "metadata.annotations."
 )

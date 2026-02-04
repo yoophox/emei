@@ -13,7 +13,11 @@ type Err struct {
 type ErrId string
 
 func (e *Err) Error() string {
-  return fmt.Sprintf("eid:%s,by:(%s)", e.Eid, e.Err.Error())
+  s := fmt.Sprintf("eid:%s", e.Eid)
+  if e.Err != nil {
+    s += fmt.Sprintf(",by:(%s)", e.Err.Error())
+  }
+  return s
 }
 
 func (e *Err) Isx(e_ any) bool {
@@ -39,6 +43,12 @@ func (e *Err) Isx(e_ any) bool {
   }
 }
 
+// Is ...
+func Is(e error) bool {
+  _, ok := e.(*Err)
+  return ok
+}
+
 // Wrap ...
 func Wrap(e error, id ErrId) *Err {
   if e == nil {
@@ -46,4 +56,16 @@ func Wrap(e error, id ErrId) *Err {
   }
 
   return &Err{Eid: id, Err: e}
+}
+
+// ErrorF ...
+func ErrorF(eid ErrId, args ...any) error {
+  e := &Err{}
+  e.Eid = eid
+  if len(args) == 1 {
+    e.Err = errors.New(args[0].(string))
+  } else {
+    e.Err = fmt.Errorf(args[0].(string), args[1:]...)
+  }
+  return e
 }

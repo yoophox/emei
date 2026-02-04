@@ -25,7 +25,7 @@ func lookupServerInLocal(svc string) (*Server, error) {
     return nil, fmt.Errorf("no local ip for: %s", svc)
   }
 
-  return &Server{Port: net.Port, Net: net.Net, IP: ip[0]}, nil
+  return &Server{Net: net, IP: ip[0]}, nil
 }
 
 func lookupNetInLocal(svc string) (*Net, error) {

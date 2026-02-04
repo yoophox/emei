@@ -43,6 +43,13 @@ func WithClaims(kv ...string) Option {
   }
 }
 
+// WithUserClaim ...
+func WithUserClaim(uid, uname string) Option {
+  return func(_ *options) {
+    WithClaims("uid", uid, "uname", uname)
+  }
+}
+
 // WithID ...
 func WithID(id string) Option {
   return func(o *options) {

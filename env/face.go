@@ -12,7 +12,7 @@ type Env interface {
   Trace(name string)
   Assert()
   AssertErr(err error, eid ...errs.ErrId) // o=func() or ErrId
-  AssertBool(ok bool, eid errs.ErrId, fmt_ string, args ...any)
+  AssertBool(ok bool, eid errs.ErrId, args ...any)
   Done() <-chan struct{}
   IsDone() bool
   Go(f any, args ...any)

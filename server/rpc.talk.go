@@ -77,7 +77,7 @@ func poolOrNew(p *sync.Pool, svc string) (*linkTx, error) {
   if err != nil {
     return nil, err
   }
-  conn, err := dialQuic(si.IP + ":" + si.Port)
+  conn, err := dialQuic(si.IP + ":" + si.Net.Ports["quic"].Port)
   if err != nil {
     return nil, err
   }

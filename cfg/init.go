@@ -3,6 +3,7 @@ package cfg
 import (
   "os"
   "path"
+  "time"
 
   "github.com/yoophox/emei/flag"
   "github.com/yoophox/emei/utils"
@@ -31,4 +32,7 @@ func init() {
   }
 }
 
-var Service string
+var (
+  Service    string
+  SysTimeout time.Duration = 5
+)

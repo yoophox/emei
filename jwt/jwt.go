@@ -14,8 +14,10 @@ type JWT interface {
   Exchange(opts ...Option) JWT
   IsLegal() bool
   Err() error
-  Sign() (string, error)
+  // Sign() (string, error)
   Raw() string
+  UID() string
+  UNmae() string
 }
 
 // New ...
@@ -30,18 +32,17 @@ func New(o ...Option) JWT {
   clms.Subject = opts.Subject
   clms.ExpiresAt = jwt.NewNumericDate(opts.ExpiresAt)
   clms.Clms = opts.Clms
-
   t := &token{}
   t.Token = jwt.NewWithClaims(jwt.SigningMethodEdDSA, clms)
-  // t.Header = map[string]any{}
+
   pkiid, err := pki.GetRandomCrpto(pki.WithED25519())
   if err != nil {
     t.err = err
     return t
   }
   t.Header[COMMON_HEADER_PKI_ID] = pkiid
-  // t.Claims = clms
-  t.Valid = true
+
+  t.sign()
 
   return t
 }

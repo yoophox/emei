@@ -57,17 +57,21 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
 
 // lookupNetFromCfg ...
 func lookupNetFromCfg(svcCfg cfg.Config) (*Net, error) {
-  var port string
-  err := svcCfg.Scan(CFG_RPC_PORT_PATH, &port)
+  net := &Net{}
+
+  err := svcCfg.Scan(CFG_SERVICE_PORTS_PATH, &net.ports)
   if err != nil {
     return nil, err
   }
-  // var net string
-  // err = svcCfg.Scan(CFG_RPC_NET_PATH, &net)
-  // if err != nil {
-  //   return nil, err
-  // }
-  return &Net{Port: port}, nil
+  net.Ports = make(map[string]*ServicePort, len(net.ports))
+  for _, p := range net.ports {
+    if p.TargetPort == "" {
+      p.TargetPort = p.Port
+    }
+    net.Ports[p.Name] = p
+  }
+
+  return net, nil
 }
 
 // getDeployedSeviceName ...

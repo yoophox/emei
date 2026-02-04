@@ -18,6 +18,20 @@ func schedule() {
   for {
     select {
     case m := <-_elemChan:
+      dur := m.t - time.Since(_baseTime)
+      if dur <= 0 {
+        dur = 1
+      }
+      if !_skiplist.IsEmpty() {
+        s := _skiplist.GetSmallestNode().GetValue().(*skiplistElem)
+        sdur := s.t - time.Since(_baseTime)
+        if dur < sdur {
+          _ticker.Reset(dur)
+        }
+      } else {
+        _ticker.Reset(dur)
+      }
+
       _skiplist.Insert(m)
     case m := <-_removeElemChan:
       _skiplist.Delete(m)

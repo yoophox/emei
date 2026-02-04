@@ -55,7 +55,7 @@ func createExports() {
     ip = "[" + ip + "]"
   }
 
-  url := "http://" + ip + ":" + s.Port
+  url := "http://" + ip + ":" + s.Net.Ports["grpc"].Port
   _otelLogExporter, err = otlploggrpc.New(context.Background(),
     otlploggrpc.WithEndpointURL(url))
   if err != nil {

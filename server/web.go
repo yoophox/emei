@@ -11,6 +11,9 @@ import (
 
 // serveHttp ...
 func serveHttp(w http.ResponseWriter, r *http.Request) {
+  defer func() { recover() }()
+  enableCors(w, r)
+
   topic := strings.TrimPrefix(r.URL.Path, "/")
   pos := strings.Index(topic, ".")
   if pos <= 0 {
@@ -64,7 +67,7 @@ func serveHttp(w http.ResponseWriter, r *http.Request) {
   params := []reflect.Value{rcvr.value, reflect.ValueOf(e)}
   if len(ptyps) == 3 {
     e.AssertBool(r.Header.Get("upgrade") == "websocket", ERR_ID_WEB_NOT_WS_CALL, "met is for ws call but not ws request: %s", topic)
-    ws, err := newwebSocket(w, r)
+    ws, err := newWebSocket(w, r)
     e.AssertErr(err, ERR_ID_WEB_NEW_SOCKET)
     params = append(params, reflect.ValueOf(ws))
   } else {
@@ -91,8 +94,21 @@ func serveHttp(w http.ResponseWriter, r *http.Request) {
   // }
 }
 
-// newwebSocket ...
-func newwebSocket(w http.ResponseWriter, r *http.Request) (WebSock, error) {
+// newWebSocket ...
+func newWebSocket(w http.ResponseWriter, r *http.Request) (WebSock, error) {
   up := websocket.Upgrader{}
   return up.Upgrade(w, r, w.Header())
+}
+
+// enableCors ...
+func enableCors(w http.ResponseWriter, r *http.Request) {
+  w.Header()["Access-Control-Allow-Origin"] = _webCorsOri
+
+  // priflight
+  if r.Method == http.MethodOptions {
+    headers := w.Header()
+    headers["Vary"] = []string{"Origin, Access-Control-Request-Method, Access-Control-Request-Headers"}
+    w.WriteHeader(http.StatusOK)
+    panic("")
+  }
 }
