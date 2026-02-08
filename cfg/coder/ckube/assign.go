@@ -96,10 +96,13 @@ func assignStuct(src, dst reflect.Value) error {
     fk_ := fTyp.Kind()
     if fk_ == reflect.Pointer {
       fTyp = fTyp.Elem()
+    }
+    if fk_ == reflect.Pointer || isNil(dst.Field(i)) {
       pfv = reflect.New(fTyp)
-      dst.Field(i).Set(pfv)
-    } else {
+    } else if dst.Field(i).CanAddr() {
       pfv = dst.Field(i).Addr()
+    } else {
+      continue
     }
     f, err := getAssignFx(fTyp)
     if err != nil {
@@ -108,6 +111,12 @@ func assignStuct(src, dst reflect.Value) error {
     err = f(fSrc, pfv.Elem())
     if err != nil {
       return err
+    }
+    if fk_ == reflect.Pointer {
+      dst.Field(i).Set(pfv)
+    }
+    if isNil(dst.Field(i)) {
+      dst.Field(i).Set(pfv.Elem())
     }
   }
 
@@ -241,6 +250,16 @@ func getAssignFx(v reflect.Type) (assignFx, error) {
   }
 
   return nil, errs.ErrorF("err.cfg.encodet.struct.getAssignFx", "not supported type:%v", v)
+}
+
+// isNil ...
+func isNil(v reflect.Value) bool {
+  k := v.Type().Kind()
+  if k == reflect.Map || k == reflect.Slice {
+    return v.IsNil()
+  }
+
+  return false
 }
 
 type assignFx func(src, dst reflect.Value) error
