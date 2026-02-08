@@ -1,7 +1,6 @@
 package coder
 
 import (
-  "errors"
   "fmt"
 
   "github.com/yoophox/emei/cfg/coder/cfgc"
@@ -15,8 +14,8 @@ import (
 func Encode(eType string, s inter.Source) (values.Values, error) {
   enc, ok := _encs[eType]
   if !ok {
-    return nil, errors.New(
-      fmt.Sprintf("fail: code->encode, msg:cann't: find encoder for '%s'", eType))
+    return nil,
+      fmt.Errorf("fail: code->encode, msg:cann't: find encoder for '%s'", eType)
   }
 
   return enc(s)

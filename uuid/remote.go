@@ -3,9 +3,7 @@ package uuid
 import (
   "context"
   "crypto/tls"
-  "fmt"
   "io"
-  "net"
   "net/http"
   "net/url"
   "strconv"
@@ -16,6 +14,7 @@ import (
   "github.com/quic-go/quic-go/http3"
   "github.com/yoophox/emei/kube"
   "github.com/yoophox/emei/names"
+  "github.com/yoophox/emei/utils"
 )
 
 // worker ...
@@ -33,15 +32,6 @@ func worker() {
   }
 }
 
-// compriseURL ...
-func compriseURL(ip, port string) string {
-  ip_ := net.ParseIP(ip)
-  if ip_.To16() != nil {
-    return fmt.Sprintf("[%s]:%s/uuid.uuids", ip, port)
-  }
-  return fmt.Sprintf("%s:%s/uuid.uuids", ip, port)
-}
-
 // getter ...
 func getter(net *kube.Net) {
   for {
@@ -53,7 +43,7 @@ func getter(net *kube.Net) {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     v := &url.Values{}
     v.Add("num", "100")
-    url := compriseURL(ip, net.Ports["quic"].Port)
+    url := utils.CompriseAddr(ip, net.GetPortByName(names.NAME_SERVICE_PORT_DEFAULT_QUIC)) + "/uuid.uuids"
     req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, strings.NewReader(v.Encode()))
     if err != nil {
       panic(err)

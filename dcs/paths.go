@@ -11,4 +11,6 @@ func CompriseMachineidPath(id uint16) string {
   return fmt.Sprintf("%s.machineid.%d", cfg.Service, id)
 }
 
+// _root = {services}
+// path = svcname.class.
 var _ROOT = "/"

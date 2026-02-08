@@ -5,11 +5,11 @@ import (
   "fmt"
   "strings"
 
+  "github.com/yoophox/emei/cfg/source/inter"
   "k8s.io/api/core/v1"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
   "k8s.io/client-go/kubernetes"
   "k8s.io/client-go/rest"
-  "github.com/yoophox/emei/cfg/source/inter"
 )
 
 type ckube struct {
@@ -32,7 +32,15 @@ func Load(p string) (inter.Source, error) {
   }
   switch p_[0] {
   case "service:cfg":
-    t, err := clientset.CoreV1().Services("").Get(context.Background(), "", metav1.GetOptions{})
+    dns := strings.Trim(p_[1], ".")
+    pos := strings.Index(dns, ".")
+    ns_ := ""
+    svc := dns
+    if pos > 0 {
+      svc = dns[:pos]
+      ns_ = dns[pos+1:]
+    }
+    t, err := clientset.CoreV1().Services(ns_).Get(context.Background(), svc, metav1.GetOptions{})
     if err != nil {
       return nil, fmt.Errorf("fail:cfg source load, source:kube, err:get, par:{%s}", err.Error())
     }

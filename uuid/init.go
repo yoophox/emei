@@ -8,6 +8,7 @@ import (
   "os/signal"
   "strconv"
   "strings"
+  "sync"
   "syscall"
   "time"
 
@@ -31,10 +32,6 @@ func init() {
   }
 
   if *_mId == 0 {
-    machineidFromValkey()
-  }
-
-  if *_mId == 0 {
     var pnum int
     pnum, err = getPodOrdinal()
     if err == nil {
@@ -43,6 +40,7 @@ func init() {
   }
 
   if *_mId == 0 {
+    machineidFromValkey()
     go sigupdate()
   }
 
@@ -86,6 +84,9 @@ func sigupdate() {
 }
 
 func machineidFromValkey() {
+  _machineidMut.Lock()
+  defer _machineidMut.Unlock()
+
   if _machineId > 100 {
     return
   }
@@ -94,46 +95,78 @@ func machineidFromValkey() {
     return
   }
 
-  for {
-    u := rand.Intn(65000)
-    if u <= 100 {
-      u += 100
-    }
+  ctx, cancel := context.WithTimeout(context.Background(), cfg.SysTimeout*time.Second)
+  aofSync, errc := dcs.Valkey.ConfigGet(ctx, []string{"appendfsync"})
+  cancel()
+  if errc != nil || (aofSync["appendfsync"] != "everysec" && aofSync["appendfsync"] != "always") {
+    return
+  }
 
-    ctx, cancel := context.WithTimeout(context.Background(), cfg.SysTimeout*time.Second)
-    mp_ := dcs.CompriseMachineidPath(uint16(u))
-    ok, err := dcs.Valkey.MSetNX(ctx, map[string]string{mp_: "a"})
-    cancel()
+  for {
+    u, err := doGetFromValkeyargs()
     if err != nil {
       return
     }
 
-    if ok {
-      _machineId = uint16(u)
-      go func() {
-        for {
-          ctx, cancel := context.WithTimeout(context.Background(), cfg.SysTimeout*time.Second)
-          ok, err := dcs.Valkey.Expire(ctx, mp_, _vkmachineidExp)
-          cancel()
-          if err != nil || !ok {
-            _machineId = 1
-            go machineidFromValkey()
-            return
-          }
-          time.Sleep(_vkMachineidSleep)
-        }
-      }()
-
-      return
+    if u == 0 {
+      continue
     }
+
+    _machineId = u
   }
+}
+
+// doGetFromValkey ...
+func doGetFromValkeyargs() (uint16, error) {
+  u := rand.Intn(65000)
+  if u <= 100 {
+    u += 100
+  }
+
+  mp_ := dcs.CompriseMachineidPath(uint16(u))
+  ctx, cancel := context.WithTimeout(context.Background(), (cfg.SysTimeout+3)*time.Second)
+  defer cancel()
+  ok, err := dcs.Valkey.MSetNX(ctx, map[string]string{mp_: "a"})
+  if err != nil {
+    return 0, err
+  }
+  if !ok {
+    return 0, nil
+  }
+
+  time.Sleep(3 * time.Second)
+  exp, err := dcs.Valkey.ExpireTime(ctx, "")
+  if err != nil {
+    return 0, err
+  }
+  if exp != -1 {
+    return 0, nil
+  }
+
+  go func(mp_ string) {
+    for {
+      ctx, cancel = context.WithTimeout(context.Background(), cfg.SysTimeout*time.Second)
+      ok, err := dcs.Valkey.Expire(ctx, mp_, _vkmachineidExp)
+      cancel()
+      if err != nil || !ok {
+        _machineId = 1
+        go machineidFromValkey()
+        return
+      }
+
+      time.Sleep(_vkMachineidSleep)
+    }
+  }(mp_)
+
+  return uint16(u), nil
 }
 
 var (
   _localIdGener     *sonyflake.Sonyflake
   _machineId        uint16 = 1
+  _machineidMut            = &sync.Mutex{}
   _uuidCh                  = make(chan int64, 100)
   _uuidWorking      bool   = false
-  _vkmachineidExp          = 30*25*time.Hour + 10*time.Second
-  _vkMachineidSleep        = 30 * 25 * time.Hour
+  _vkmachineidExp          = 5*time.Hour + 10*time.Second
+  _vkMachineidSleep        = 5 * time.Hour
 )

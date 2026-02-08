@@ -7,6 +7,7 @@ import (
 
   "github.com/yoophox/emei/env"
   "github.com/yoophox/emei/kube"
+  "github.com/yoophox/emei/names"
 )
 
 // talk ...
@@ -77,7 +78,7 @@ func poolOrNew(p *sync.Pool, svc string) (*linkTx, error) {
   if err != nil {
     return nil, err
   }
-  conn, err := dialQuic(si.IP + ":" + si.Net.Ports["quic"].Port)
+  conn, err := dialQuic(si.Addr(names.NAME_SERVICE_PORT_DEFAULT_QUIC))
   if err != nil {
     return nil, err
   }

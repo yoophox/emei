@@ -4,6 +4,7 @@ import (
   "fmt"
 
   "github.com/yoophox/emei/cfg/source/cetc"
+  "github.com/yoophox/emei/cfg/source/ckube"
   "github.com/yoophox/emei/cfg/source/inter"
   "github.com/yoophox/emei/cfg/source/local"
 )
@@ -20,8 +21,9 @@ func Load(sTyp, url string) (inter.Source, error) {
 type loadF func(string) (inter.Source, error)
 
 var _loaders = map[string]loadF{
-  "local": local.Load,
-  "etc":   cetc.Load,
+  CFG_SOURCE_LOCAL: local.Load,
+  CFG_SOURCE_ETC:   cetc.Load,
+  CFG_SOURCE_KUBE:  ckube.Load,
 }
 
 const (

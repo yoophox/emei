@@ -25,8 +25,8 @@ import (
 )
 
 type local struct {
-  cryptos map[uint64]*cryptosx
-  crps    map[string][]*cryptosx // key = type: rsa
+  cryptos map[uint64]*cipherTx
+  crps    map[string][]*cipherTx // key = type: rsa
 }
 
 // newLocal ...
@@ -41,10 +41,10 @@ func newLocalBackend() *local {
   // regS := regexp.MustCompile(`^@key.*type:[a-z]+`)
 
   fsc := bufio.NewReader(f)
-  var c *cryptosx
+  var c *cipherTx
   var pril, publ int
 
-  l := &local{cryptos: map[uint64]*cryptosx{}, crps: map[string][]*cryptosx{}}
+  l := &local{cryptos: map[uint64]*cipherTx{}, crps: map[string][]*cipherTx{}}
   for line, err := fsc.ReadBytes('\n'); ; line, err = fsc.ReadBytes('\n') {
     if err != nil {
       if err == io.EOF {
@@ -69,7 +69,7 @@ func newLocalBackend() *local {
       panic("format error")
     }
 
-    c = &cryptosx{}
+    c = &cipherTx{}
     c.Typ = string(ct_)
     cid_, err := strconv.ParseInt(string(cid), 10, 64)
     if err != nil {
@@ -105,7 +105,7 @@ func newLocalBackend() *local {
     c.Pub = pub
     _, ok := l.crps[c.Typ]
     if !ok {
-      l.crps[c.Typ] = []*cryptosx{}
+      l.crps[c.Typ] = []*cipherTx{}
     }
     l.crps[c.Typ] = append(l.crps[c.Typ], c)
     l.cryptos[uint64(cid_)] = c

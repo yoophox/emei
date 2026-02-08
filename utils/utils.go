@@ -29,6 +29,12 @@ func AssertTrue(a bool) {
   }
 }
 
+// Print ...
+func Print(a ...any) {
+  f, fu_, l := GetCallInfo(1)
+  fmt.Printf("file:%s, func:%s, line:%d, %+v", f, fu_, l, a)
+}
+
 // skip = 0, return name of caller of GetCallInfo
 func GetCallInfo(skip int) (file string,
   function string, line int,

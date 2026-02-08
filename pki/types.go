@@ -1,10 +1,10 @@
 package pki
 
-type cryptosx struct {
+type cipherTx struct {
   Pri any
   Pub any
   CID uint64
   Typ string // rsa...
 }
 
-type cryptoClass string
+type cipherType string

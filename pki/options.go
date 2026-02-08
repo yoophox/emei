@@ -2,7 +2,7 @@ package pki
 
 type (
   options struct {
-    typ  cryptoClass
+    typ  cipherType
     bits int
   }
   Option func(opt *options)

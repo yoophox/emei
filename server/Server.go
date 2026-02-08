@@ -4,8 +4,6 @@ import (
   "os"
   "os/signal"
 
-  "github.com/yoophox/emei/kube"
-  "github.com/yoophox/emei/names"
   "github.com/yoophox/emei/utils"
 )
 
@@ -33,11 +31,11 @@ func ServeFor(fo SvrFor, rcvr ...any) {
 
 // Serve ...
 func Serve() {
-  netx, err := kube.LookupNet(names.NAME_SERVICE_SELF)
+  //  netx, err := kube.LookupNet(names.NAME_SERVICE_SELF)
+  // utils.AssertErr(err)
+  err := listenQuic(*_host + ":" + *_port)
   utils.AssertErr(err)
-  err = listenQuic(":" + netx.Ports["quic"].TargetPort)
-  utils.AssertErr(err)
-  err = listenTcp(":" + netx.Ports["tcp"].TargetPort)
+  err = listenTcp(*_host + ":" + *_port)
   utils.AssertErr(err)
   wait()
 }

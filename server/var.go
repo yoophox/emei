@@ -37,6 +37,8 @@ var (
   _rpcRecvs   = map[string]*rcvrTx{}
   _webRecvs   = map[string]*rcvrTx{}
   _webCorsOri = []string{"*"}
+  _port       *string
+  _host       *string
   //_wg       *sync.WaitGroup
 )
 

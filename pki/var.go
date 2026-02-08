@@ -5,6 +5,6 @@ package pki
 //  _typCryptos = map[string]*cryptosx{}
 
 const (
-  _CRYPTO_CLASS_RSA     cryptoClass = "rsa"
-  _CRYPTO_CLASS_ED25519 cryptoClass = "ed25519"
+  _CRYPTO_CLASS_RSA     cipherType = "rsa"
+  _CRYPTO_CLASS_ED25519 cipherType = "ed25519"
 )

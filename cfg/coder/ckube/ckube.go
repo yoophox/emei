@@ -1,97 +1,92 @@
 package ckube
 
 import (
-  "encoding/json"
   "fmt"
   "reflect"
   "strings"
 
-  "k8s.io/api/core/v1"
   "github.com/yoophox/emei/cfg/source/inter"
   "github.com/yoophox/emei/cfg/values"
+  "github.com/yoophox/emei/errs"
 )
 
 type values_ struct {
-  s *v1.Service
+  s reflect.Value
 }
 
 // ...
 func Encode(s inter.Source) (values.Values, error) {
   s_, _ := s.Read()
-  return &values_{s_.(*v1.Service)}, nil
+  v_ := reflect.ValueOf(s_)
+  v_ = getElemOfPointer(v_)
+  if v_.Kind() != reflect.Struct {
+    return nil, errs.ErrorF("err.cfg.encoder.struct.encode", "source is not a structure value")
+  }
+  return &values_{v_}, nil
 }
 
 func (v *values_) Read(p string) (string, error) {
   if p == "" {
     return "", fmt.Errorf("fail: cfg encoder, encoder:kube, err:path is empty")
   }
+
   paths := strings.Split(p, ".")
 
-  switch paths[0] {
-  case "ports[*]":
-    p, _ := json.Marshal(v.s.Spec.Ports)
-    return string(p), nil
-  case "metadata":
-    if len(paths) == 3 && paths[1] == "labals" {
-      l, ok := v.s.ObjectMeta.Labels[paths[2]]
-      if ok {
-        return l, nil
-      }
+  var ret reflect.Value = v.s
+  for _, ps_ := range paths {
+    if ret.Kind() != reflect.Struct {
+      return "", errs.ErrorF("err.cfg.encoder.struct.read", "v.s is not struct")
+    }
+    ret := ret.FieldByName(ps_)
+    if ret.Interface() == nil {
+      return "", errs.ErrorF("err.cfg.encoder.struct.read.no", "not exist value for path:%s", p)
     }
   }
 
-  return "", fmt.Errorf("fail:cfg encoder, encoder:kube, err: path, path:%s", p)
+  return fmt.Sprintf("%v", ret.Interface()), nil
 }
 
 func (e *values_) Scan(p string, v any) (err error) {
   defer func() {
     if r := recover(); r != nil {
-      err = fmt.Errorf("fail:cfg scan, coder:kube, reason:panic, msg:%+v, path:%s", r, p)
+      err = fmt.Errorf("fail:cfg scan, coder:struct, reason:panic, msg:%+v, path:%s", r, p)
     }
   }()
 
   if p == "" {
-    return fmt.Errorf("fail: cfg encoder scan, encoder:kube, err:path is empty")
+    return fmt.Errorf("fail: cfg encoder, encoder:struct, err:path is empty")
   }
-  vt_ := reflect.TypeOf(v)
-  if vt_.Kind() != reflect.Pointer {
-    return fmt.Errorf("fail:cfg scan, coder:ckube, err:v is not pointer, v:%s", vt_)
+
+  v_ := reflect.ValueOf(v)
+  if v_.Kind() != reflect.Pointer {
+    return errs.ErrorF("err.cfg.encoder.struct.scan", "v is not pointer")
   }
 
   paths := strings.Split(p, ".")
-
-  switch paths[0] {
-  case "ports[*]":
-    // p, _ := json.Marshal(v.s.Spec.Ports)
-    tt_ := reflect.MakeSlice(vt_.Elem(), len(e.s.Spec.Ports), len(e.s.Spec.Ports))
-    for key, value := range e.s.Spec.Ports {
-      tti := tt_.Index(key)
-      ivn_ := tti.FieldByName("Name")
-      ivp_ := tti.FieldByName("Port")
-      if ivn_.IsNil() || ivp_.IsNil() {
-        continue
-      }
-      ivn_.SetString(value.Name)
-      ivp_.SetString(fmt.Sprintf("%d", value.Port))
+  var ret reflect.Value = e.s
+  for _, ps_ := range paths {
+    ret = getElemOfPointer(ret)
+    if ret.Kind() != reflect.Struct {
+      return errs.ErrorF("err.cfg.encoder.struct.scan", "not exist value for path:%s, by:non-structured values", p)
     }
-    vv_ := reflect.ValueOf(v)
-    vv_.Elem().Set(tt_)
-    return nil
-
-  case "metadata":
-    if len(paths) == 3 && paths[1] == "labals" {
-      l, ok := e.s.ObjectMeta.Labels[paths[2]]
-      if ok {
-        return fmt.Errorf("fail:cfg scan, coder:kube, err:path, path:%s", p)
-      }
-      reflect.ValueOf(v).Elem().SetString(l)
-      return nil
+    ret := ret.FieldByName(ps_)
+    if !ret.IsValid() {
+      return errs.ErrorF("err.cfg.encoder.struct.scan", "not exist value for path:%s, by: no feild", p)
     }
   }
 
-  return fmt.Errorf("fail:cfg skan, encoder:kube, err:path, path:%s", p)
+  return assign(ret, v_)
 }
 
 func (v *values_) Set(p string, o any) error {
   return nil
+}
+
+// getElemOfPointer ...
+func getElemOfPointer(v reflect.Value) reflect.Value {
+  if v.Kind() == reflect.Pointer {
+    v = v.Elem()
+  }
+
+  return v
 }

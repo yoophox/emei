@@ -15,6 +15,7 @@ type Net struct {
   Ports map[string]*ServicePort
 
   ports []*ServicePort
+  svc   string
 }
 
 type ServicePort struct {

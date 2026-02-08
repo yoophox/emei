@@ -47,15 +47,12 @@ func init() {
 func createExports() {
   s, err := kube.LookupServer(names.NAME_SERVICE_OTEL_COLLECTOR)
   if err != nil {
-    panic(err)
+    // panic(err)
+    utils.Print(err)
+    return
   }
 
-  ip := s.IP
-  if !utils.IsIpv4(ip) {
-    ip = "[" + ip + "]"
-  }
-
-  url := "http://" + ip + ":" + s.Net.Ports["grpc"].Port
+  url := "http://" + s.GetPortByName(names.NAME_SERVICE_PORT_OTEL_COLLETOR)
   _otelLogExporter, err = otlploggrpc.New(context.Background(),
     otlploggrpc.WithEndpointURL(url))
   if err != nil {

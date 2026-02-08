@@ -52,7 +52,7 @@ func configValkey() {
   ccf := config.NewClusterClientConfiguration()
   node := &config.NodeAddress{}
   node.Host = svr.IP
-  port, _ := strconv.ParseInt(svr.Net.Ports[names.NAME_SERVICE_PORT_VALKEY_CLIENT].Port, 10, 32)
+  port, _ := strconv.ParseInt(svr.GetPortByName(names.NAME_SERVICE_PORT_VALKEY_CLIENT), 10, 32)
   node.Port = int(port)
   ccf.WithAddress(node)
   Valkey, err = glide.NewClusterClient(ccf)

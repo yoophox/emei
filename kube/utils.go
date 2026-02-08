@@ -4,6 +4,8 @@ import (
   "fmt"
 
   "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/kube/errors"
   "github.com/yoophox/emei/names"
 )
 
@@ -29,6 +31,9 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
   }
 
   dSvcName := getDeployedSeviceName(svc)
+  if dSvcName == "" {
+    return nil, errs.ErrorF(errs.ErrId(errors.ERR_ID_KUBE_EMPTY_SERVICE_NAME))
+  }
   uri := ""
   switch uriType {
   case "local":
@@ -56,8 +61,8 @@ func getSvcCfg(svc, uriType string) (cfg.Config, error) {
 }
 
 // lookupNetFromCfg ...
-func lookupNetFromCfg(svcCfg cfg.Config) (*Net, error) {
-  net := &Net{}
+func lookupNetFromCfg(svc string, svcCfg cfg.Config) (*Net, error) {
+  net := &Net{svc: svc}
 
   err := svcCfg.Scan(CFG_SERVICE_PORTS_PATH, &net.ports)
   if err != nil {
@@ -85,8 +90,10 @@ func getDeployedSeviceName(svc string) string {
   if err == nil || name != "" {
     return name
   }
-  // fmt.Println("file:kube.utils,", "err", err)
 
-  // get real service name from annotation of cfg
+  if svc[len(svc)-1] == '@' {
+    return ""
+  }
+
   return svc[2:]
 }

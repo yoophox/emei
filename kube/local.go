@@ -4,6 +4,8 @@ import (
   "fmt"
 
   "github.com/yoophox/emei/cfg"
+  "github.com/yoophox/emei/errs"
+  "github.com/yoophox/emei/kube/errors"
 )
 
 func lookupServerInLocal(svc string) (*Server, error) {
@@ -14,8 +16,14 @@ func lookupServerInLocal(svc string) (*Server, error) {
 
   var ip []string
   dSvcName := getDeployedSeviceName(svc)
+  if dSvcName == "" {
+    return nil, errs.ErrorF(errs.ErrId(errors.ERR_ID_KUBE_EMPTY_SERVICE_NAME))
+  }
   if _hosts == nil {
-    initHost()
+    err := initHost()
+    if err != nil {
+      return nil, err
+    }
   }
   err = _hosts.Scan("ips."+dSvcName, &ip)
   if err != nil {
@@ -34,7 +42,7 @@ func lookupNetInLocal(svc string) (*Net, error) {
     return nil, err
   }
 
-  return lookupNetFromCfg(svcCfg)
+  return lookupNetFromCfg(svc, svcCfg)
 }
 
 func lookupIPInLocal(svc string) (string, error) {
@@ -48,11 +56,13 @@ func lookupEPTsInLocal(svc string) (ips []string, err error) {
 var _hosts cfg.Config
 
 // initHost ...
-func initHost() {
+func initHost() error {
   uri := cfg.BuildCfgURI(cfg.CFG_SOURCE_LOCAL, *_localDir+"/host.json")
   var err error
   _hosts, err = cfg.New(uri)
   if err != nil {
-    panic(err)
+    return err
   }
+
+  return nil
 }
